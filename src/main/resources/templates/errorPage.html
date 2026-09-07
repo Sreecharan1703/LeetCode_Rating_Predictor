@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<!-- Add the Thymeleaf namespace -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Problem Scraper</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #151419;
+            --bg-card: #1c1b22;
+            --text-main: #FFFFFF;
+            --danger: #ff4d4f;
+            --accent: #027CFF;
+        }
+        * { box-sizing: border-box; }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Gilroy', 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .gaming-card {
+            background-color: var(--bg-card);
+            padding: 45px 35px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 77, 79, 0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .gaming-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background-color: var(--danger);
+        }
+        .error-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+        h2 {
+            margin-top: 0;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .error-message {
+            font-size: 15px;
+            color: var(--danger);
+            background-color: rgba(255, 77, 79, 0.1);
+            border: 1px solid rgba(255, 77, 79, 0.2);
+            padding: 16px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+        .btn-outline {
+            display: inline-block;
+            background-color: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+            text-decoration: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-outline:hover {
+            background-color: var(--accent);
+            color: var(--text-main);
+        }
+    </style>
+</head>
+<body>
+<div class="gaming-card">
+    <div class="error-icon">⚠️</div>
+    <h2>Congrats,You found a Wild Error!</h2>
+    <!-- Bind the backend error message variable using th:text -->
+    <div class="error-message" th:text="${error}">
+        Default error message fallback
+    </div>
+    <a href="/" class="btn-outline">Return to Search</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem Scraper</title>
+    <!-- Fallback font similar to Gilroy -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #151419;
+            --bg-card: #1c1b22;
+            --text-main: #FFFFFF;
+            --text-muted: #8b8a91;
+            --accent: #027CFF;
+            --accent-hover: #0265d1;
+        }
+        * { box-sizing: border-box; }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Gilroy', 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            /* Subtle background glow effect simulating the video's dark atmosphere */
+            background-image: radial-gradient(circle at 50% -20%, rgba(2, 124, 255, 0.15), transparent 50%);
+        }
+        .gaming-card {
+            background-color: var(--bg-card);
+            padding: 45px 35px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Top blue accent line */
+        .gaming-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background-color: var(--accent);
+        }
+        h2 {
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background-color: #121115;
+            color: var(--text-main);
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        input[type="number"]::placeholder {
+            color: var(--text-muted);
+        }
+        input[type="number"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(2, 124, 255, 0.2);
+        }
+        input[type="submit"] {
+            width: 100%;
+            background-color: var(--accent);
+            color: var(--text-main);
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: var(--accent-hover);
+        }
+        input[type="submit"]:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+<div class="gaming-card">
+    <h2>Search Problem</h2>
+    <form action="/search" method="GET">
+        <input type="number" name="id" placeholder="Enter a Q.id. ex- 1234" required/>
+        <input type="submit" value="Get Rating">
+    </form>
+</div>
+</body>
+</html>
