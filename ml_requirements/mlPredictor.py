@@ -2,19 +2,12 @@ import pickle
 import pandas as pd
 import re
 
-def load_dataset():
+def load_dataset(query):
     pattern = r',\s*(?![^\[]*\])'
     parsed_rows = []
 
-    fileName = 'ml_requirements/inputFile.txt'
-
-    with open(fileName, 'r', encoding='utf-8') as file:
-        for line in file:
-            line = line.strip()
-            if not line:
-                continue
-            row = re.split(pattern, line)
-            parsed_rows.append(row)
+    row = re.split(pattern, query)
+    parsed_rows.append(row)
 
     columns = [
         "Q.id", "Likes", "Dislikes", "Difficulty",
@@ -40,18 +33,13 @@ def makeSuitableforPrediction(df):
     df['DislikeRatio'] = df['Dislikes']/(df['Dislikes']+df['Likes']+1)
     return df
 
-def saveToFile(rating):
-    fileName = 'ml_requirements/outputFile.txt'
-    with open(fileName,'w') as file:
-        file.write(str(rating))
-
-def run_prediction():
+def run_prediction(query):
     with open('ml_requirements/mlbFile.pkl','rb') as file:
         mlb = pickle.load(file)
     with open('ml_requirements/modelFile.pkl','rb') as file:
         xgb_model = pickle.load(file)
 
-    df = load_dataset()
+    df = load_dataset(query)
     df = makeSuitableforPrediction(df)
 
     newmatrix = mlb.transform(df['Tags'])
@@ -65,7 +53,9 @@ def run_prediction():
     outputPred = xgb_model.predict(df)
     rating = outputPred[0]
 
-    saveToFile(rating)
+    return rating
 
 if __name__ == "__main__":
-    run_prediction()
+    query = sys.argv[1]
+    rating = run_prediction(query)
+    print(rating)

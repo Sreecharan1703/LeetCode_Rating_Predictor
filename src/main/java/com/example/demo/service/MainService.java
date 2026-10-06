@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@EnableCaching
 public class MainService {
     LeetcodeScraperService leetcodeScraperService;
     MainService(LeetcodeScraperService leetcodeScraperService) {
@@ -53,25 +56,23 @@ public class MainService {
                 "," + mp.get("Total Accepted") + "," + mp.get("Total Submissions") +
                 "," + topicString;
 
-        String rating = predictValue(query);
+        String rating = getRating(query,(String)mp.get("ID"));
         double rating_num =  Double.parseDouble(rating);
         model.addAttribute("Rating",(int)rating_num);
     }
 
-    public String predictValue(String query) throws Exception{
-        String inputFilePath = "ml_requirements/inputFile.txt";
-        String outputFilePath = "ml_requirements/outputFile.txt";
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(inputFilePath))){
-            bufferedWriter.write(query);
-        }
-        catch(Exception e){
-            throw new RuntimeException(e);
-        }
+    @Cacheable(value = "Ratings",key = "#id")
+    public String getRating(String query,String id) throws Exception{
+        return predictValue(query);
+    }
 
+    public String predictValue(String query) throws Exception{
         try{
-            ProcessBuilder pb = new ProcessBuilder("python3","ml_requirements/mlPredictor.py");
+            ProcessBuilder pb = new ProcessBuilder("python3","ml_requirements/mlPredictor.py","query");
             pb.redirectErrorStream(true);
             Process p = pb.start();
+
+            String result = new String(p.getInputStream().readAllBytes()).trim();
 
             int exitcode = p.waitFor();
 
@@ -84,20 +85,11 @@ public class MainService {
                 }
                 return "Python Crashed. Log:\n" + errorMessage.toString();
             }
+
+            return result;
         }
         catch(Exception e){
             throw new RuntimeException(e);
         }
-
-
-        String rating;
-        try(BufferedReader bufferedReader = new BufferedReader(new FileReader(outputFilePath))){
-            rating = bufferedReader.readLine();
-        }
-        catch(Exception e){
-            throw new RuntimeException(e);
-        }
-
-        return rating;
     }
 }
