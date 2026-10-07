@@ -1,15 +1,15 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.Data;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.lang.Double.parseDouble;
 
 @Service
 @EnableCaching
@@ -33,23 +33,22 @@ public class MainService {
         return sb.toString();
     }
 
-    public void getDetails(int id, Model model) throws Exception{
+    public Data getDetails(int id){
         Map<String,Object> mp = LeetcodeScraperService.getLeetCodeData(id);
 
-        List<String> topiclist = new ArrayList<>();
-        topiclist = (List<String>) mp.get("Topic Tags");
+        List<String> topiclist = (List<String>) mp.get("Topic Tags");
+        String topicString = convertListtoString(topiclist);
 
-        String  topicString = convertListtoString(topiclist);
-
-        model.addAttribute("Tags",mp.get("Topic Tags"));
-        model.addAttribute("Likes",mp.get("Likes"));
-        model.addAttribute("Id",mp.get("ID"));
-        model.addAttribute("Title",mp.get("Title"));
-        model.addAttribute("Dislikes",mp.get("Dislikes"));
-        model.addAttribute("Difficulty",mp.get("Difficulty"));
-        model.addAttribute("TotalAccepted",mp.get("Total Accepted"));
-        model.addAttribute("AcceptanceRate",mp.get("Acceptance Rate"));
-        model.addAttribute("TotalSubmissions",mp.get("Total Submissions"));
+        Data outputData = new Data();
+        outputData.setId((String)mp.get("ID"));
+        outputData.setTitle((String)mp.get("Title"));
+        outputData.setAcceptanceRate((String)mp.get("AcceptanceRate"));
+        outputData.setDifficulty((String)mp.get("Difficulty"));
+        outputData.setDislikes((String)mp.get("Dislikes"));
+        outputData.setLikes((String)mp.get("Likes"));
+        outputData.setTotalAccepted((String)mp.get("TotalAccepted"));
+        outputData.setTotalSubmissions((String)mp.get("TotalSubmissions"));
+        outputData.setTags(topiclist);
 
         String query = mp.get("ID") + "," + mp.get("Likes") + "," + mp.get("Dislikes") +
                 "," + mp.get("Difficulty") + "," + mp.get("Acceptance Rate") +
@@ -57,35 +56,30 @@ public class MainService {
                 "," + topicString;
 
         String rating = getRating(query,(String)mp.get("ID"));
-        double rating_num =  Double.parseDouble(rating);
-        model.addAttribute("Rating",(int)rating_num);
+        double rating_num = parseDouble(rating);
+        int rating_in_int = (int) rating_num;
+        outputData.setRating(Integer.toString(rating_in_int));
+
+        return outputData;
     }
 
     @Cacheable(value = "Ratings",key = "#id")
-    public String getRating(String query,String id) throws Exception{
+    public String getRating(String query,String id){
         return predictValue(query);
     }
 
-    public String predictValue(String query) throws Exception{
+    public String predictValue(String query){
         try{
-            ProcessBuilder pb = new ProcessBuilder("python3","ml_requirements/mlPredictor.py","query");
+            ProcessBuilder pb = new ProcessBuilder("python3","ml_requirements/mlPredictor.py",query);
             pb.redirectErrorStream(true);
             Process p = pb.start();
 
             String result = new String(p.getInputStream().readAllBytes()).trim();
 
             int exitcode = p.waitFor();
-
             if(exitcode != 0){
-                BufferedReader errorReader = new BufferedReader(new java.io.InputStreamReader(p.getInputStream()));
-                StringBuilder errorMessage = new StringBuilder();
-                String line;
-                while ((line = errorReader.readLine()) != null) {
-                    errorMessage.append(line).append("\n");
-                }
-                return "Python Crashed. Log:\n" + errorMessage.toString();
+                return "Python Crashed. Log:\n" + result;
             }
-
             return result;
         }
         catch(Exception e){

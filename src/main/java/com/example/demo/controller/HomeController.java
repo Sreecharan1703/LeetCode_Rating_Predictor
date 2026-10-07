@@ -15,18 +15,11 @@ public class HomeController {
 
     @GetMapping("/")
     public String homePage() {
-        return "homePage";
+        return "forward:/home";
     }
 
-    @GetMapping("/search")
-    public String query(@RequestParam int id, Model model) {
-        try{
-            mainService.getDetails(id,model);
-        }
-        catch(Exception e){
-            model.addAttribute("error",e.getMessage());
-            return "errorPage";
-        }
-        return "displayPage";
+    @GetMapping("/home")
+    public String home(){
+        return "homePage";
     }
 }
