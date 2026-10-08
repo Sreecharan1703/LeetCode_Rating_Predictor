@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class LeetcodeScraperService {
     public static Map<String, Object> getLeetCodeData(int frontendId){
         String titleSlug = getTitleSlugForId(frontendId);
         if (titleSlug == null) {
-            throw new RuntimeException("Dude, LeetCode doesn't have a question with id: " + frontendId);
+            throw new ResourceNotFoundException("Dude, LeetCode doesn't have a question with id: " + frontendId);
         }
         return fetchGraphQLData(titleSlug);
     }
@@ -116,10 +117,10 @@ public class LeetcodeScraperService {
             result.put("Difficulty", questionNode.path("difficulty").asText());
             result.put("Likes", questionNode.path("likes").asInt());
             result.put("Dislikes", questionNode.path("dislikes").asInt());
-            result.put("Topic Tags", tags);
-            result.put("Acceptance Rate", statsNode.path("acRate").asText());
-            result.put("Total Accepted", statsNode.path("totalAcceptedRaw").asLong());
-            result.put("Total Submissions", statsNode.path("totalSubmissionRaw").asLong());
+            result.put("TopicTags", tags);
+            result.put("AcceptanceRate", statsNode.path("acRate").asText());
+            result.put("TotalAccepted", statsNode.path("totalAcceptedRaw").asLong());
+            result.put("TotalSubmissions", statsNode.path("totalSubmissionRaw").asLong());
             
             return result;
         }

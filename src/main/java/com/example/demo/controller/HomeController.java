@@ -22,4 +22,10 @@ public class HomeController {
     public String home(){
         return "homePage";
     }
+
+    @GetMapping("/api-error")
+    public String errorPage(@RequestParam("message") String message, Model model){
+        model.addAttribute("error",message);
+        return "runtimeErrorPage";
+    }
 }

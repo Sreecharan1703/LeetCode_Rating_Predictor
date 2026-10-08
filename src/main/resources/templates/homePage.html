@@ -1,112 +1,268 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rating Predictor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>LeetCode Rating Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-main: #151419;
-            --bg-card: #1c1b22;
-            --text-main: #FFFFFF;
-            --text-muted: #8b8a91;
-            --accent: #027CFF;
-            --accent-hover: #0265d1;
+            --bg-main: #0f172a;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
+        
+        html { scroll-behavior: smooth; }
         * { box-sizing: border-box; }
-        body {
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
             background-color: var(--bg-main);
             color: var(--text-main);
-            font-family: 'Gilroy', 'Poppins', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            /* Subtle background glow effect simulating the video's dark atmosphere */
-            background-image: radial-gradient(circle at 50% -20%, rgba(2, 124, 255, 0.15), transparent 50%);
+            overflow-x: hidden;
         }
-        .gaming-card {
-            background-color: var(--bg-card);
-            padding: 45px 35px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 420px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+
+        /* Animated Background */
+        .background-blobs {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1; overflow: hidden; background: var(--bg-main);
         }
-        /* Top blue accent line */
-        .gaming-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background-color: var(--accent);
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6;
+            animation: float 10s infinite alternate ease-in-out;
         }
-        h2 {
-            margin-top: 0;
-            margin-bottom: 30px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+        .blob-1 { width: 400px; height: 400px; background: #1e1b4b; top: -100px; left: -100px; }
+        .blob-2 { width: 500px; height: 500px; background: #0f2b5a; bottom: -200px; right: -100px; animation-delay: -5s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
         }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+
+        .section-container {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
         }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%; transition: opacity 0.3s ease;
+        }
+
+        .search-card { padding: 40px; max-width: 450px; text-align: center; }
+        .dashboard-container { padding: 40px; max-width: 900px; margin: 40px auto; opacity: 0.3; pointer-events: none; display: none; }
+        .dashboard-container.active { opacity: 1; pointer-events: auto; display: block; }
+
+        h2 { margin-top: 0; margin-bottom: 25px; font-weight: 600; letter-spacing: 1px; }
+        
+        form { display: flex; flex-direction: column; gap: 20px; position: relative; }
         input[type="number"] {
-            width: 100%;
-            padding: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            background-color: #121115;
-            color: var(--text-main);
-            font-size: 16px;
-            font-family: inherit;
-            outline: none;
-            transition: all 0.3s ease;
+            width: 100%; padding: 18px; border: 1px solid var(--glass-border);
+            border-radius: 12px; background: rgba(0,0,0,0.2); color: var(--text-main);
+            font-size: 16px; font-family: inherit; outline: none; transition: 0.3s;
         }
-        input[type="number"]::placeholder {
-            color: var(--text-muted);
+        input[type="number"]:focus { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
+        
+        .submit-btn {
+            width: 100%; background: linear-gradient(135deg, #2563eb, #3b82f6); color: white;
+            border: none; padding: 18px; border-radius: 12px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
-        input[type="number"]:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 15px rgba(2, 124, 255, 0.2);
+        .submit-btn:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-2px); }
+        .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Loader */
+        .loader {
+            width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%; border-top-color: white; animation: spin 1s ease-in-out infinite;
+            display: none;
         }
-        input[type="submit"] {
-            width: 100%;
-            background-color: var(--accent);
-            color: var(--text-main);
-            border: none;
-            padding: 16px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Dashboard Layout */
+        .header {
+            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+            gap: 15px; margin-bottom: 35px; padding-bottom: 25px; border-bottom: 1px solid var(--glass-border);
         }
-        input[type="submit"]:hover {
-            background-color: var(--accent-hover);
+        .header h1 { margin: 0; font-size: 28px; font-weight: 700; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .difficulty { padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; text-transform: uppercase; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .stat-box { background: rgba(0,0,0,0.2); padding: 25px; border-radius: 12px; border: 1px solid var(--glass-border); transition: 0.3s ease; }
+        .stat-box:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); }
+        .rating-box { background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.05)); border: 1px solid var(--accent); }
+        .rating-box .stat-value { color: #60a5fa; text-shadow: 0 0 10px rgba(96, 165, 250, 0.5); }
+        .stat-label { color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-weight: 500; }
+        .stat-value { font-size: 28px; font-weight: 700; }
+        
+        .tags-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; margin-bottom: 35px; }
+        .tag { background: rgba(255,255,255,0.05); padding: 8px 18px; border-radius: 8px; font-size: 14px; border: 1px solid var(--glass-border); }
+        
+        .disclaimer-box { background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; border-radius: 8px; padding: 20px; margin-top: 20px; font-size: 14px; color: #fca5a5; }
+        .disclaimer-box ul { margin: 0; padding-left: 20px; }
+        .disclaimer-box li { margin-bottom: 5px; }
+
+        .scroll-btn {
+            background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--glass-border); padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; transition: 0.3s;
         }
-        input[type="submit"]:active {
-            transform: scale(0.98);
-        }
+        .scroll-btn:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
-<div class="gaming-card">
-    <h2>Search Problem</h2>
-    <form action="/search" method="GET">
-        <input type="number" name="id" placeholder="Enter a Q.id. ex- 1234" required/>
-        <input type="submit" value="Get Rating">
-    </form>
+
+<div class="background-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
 </div>
+
+<div id="search" class="section-container">
+    <div class="glass-card search-card">
+        <h2>Predict Difficulty</h2>
+        <form id="predictionForm">
+            <!-- Inline error banner removed -->
+            <input type="number" id="problemId" name="id" placeholder="Enter LeetCode Q.ID (e.g. 1234)" required/>
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span class="btn-text">Get Rating</span>
+                <div class="loader" id="btnLoader"></div>
+            </button>
+        </form>
+    </div>
+</div>
+
+<div id="result" class="section-container" style="padding-top: 0;">
+    <div class="glass-card dashboard-container" id="dashboard">
+        <div class="header">
+            <h1 id="res-title" th:text="${Id} != null ? ${Id} + '. ' +${Title} : 'Problem Title'">Problem Title</h1>
+            <span class="difficulty" id="res-difficulty" th:text="${Difficulty} ?: 'Unknown'">Unknown</span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box rating-box">
+                <div class="stat-label">Estimated Rating</div>
+                <div class="stat-value" id="res-rating" th:text="${Rating} ?: '0'">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Acceptance Rate</div>
+                <div class="stat-value" id="res-acceptance" th:text="${AcceptanceRate} ?: '0%'">0%</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Likes</div>
+                <div class="stat-value" id="res-likes" th:text="${Likes} ?: '0'">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Dislikes</div>
+                <div class="stat-value" id="res-dislikes" th:text="${Dislikes} ?: '0'">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total Accepted</div>
+                <div class="stat-value" id="res-accepted" th:text="${TotalAccepted} ?: '0'">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total Submissions</div>
+                <div class="stat-value" id="res-submissions" th:text="${TotalSubmissions} ?: '0'">0</div>
+            </div>
+        </div>
+
+        <div class="stat-label" style="text-align: left;">Topic Tags</div>
+        <div class="tags-container" id="res-tags">
+            <div class="tag" th:each="tag : ${Tags}" th:text="${tag}">Tag</div>
+        </div>
+
+        <a href="#search" class="scroll-btn">&uarr; New Search</a>
+        
+        <div class="disclaimer-box">
+            <ul>
+                <li><strong>Note:</strong> Rating is estimated and may vary by ±120 points.</li>
+                <li><strong>Warning:</strong> 85% accurate. Can be skewed by submission spamming.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const problemId = document.getElementById('problemId').value;
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.querySelector('.btn-text');
+        const btnLoader = document.getElementById('btnLoader');
+        const dashboard = document.getElementById('dashboard');
+        
+        // Reset UI State
+        dashboard.classList.remove('active');
+        dashboard.style.display = 'none';
+
+        // Enter Loading State
+        submitBtn.disabled = true;
+        btnText.textContent = 'Predicting...';
+        btnLoader.style.display = 'block';
+
+        try {
+            const response = await fetch(`/api/search?id=${problemId}`);
+            
+            if (!response.ok) {
+                // The GlobalRestExceptionHandler returns a JSON map containing "message"[cite: 1].
+                const errorData = await response.json();
+                throw new Error(errorData.message || "An unexpected error occurred.");
+            }
+            
+            const data = await response.json();
+            
+            // Inject Data into DOM
+            document.getElementById('res-title').textContent = `${data.Id}. ${data.Title}`;
+            document.getElementById('res-difficulty').textContent = data.Difficulty;
+            document.getElementById('res-rating').textContent = data.Rating;
+            document.getElementById('res-acceptance').textContent = data.AcceptanceRate;
+            document.getElementById('res-likes').textContent = data.Likes;
+            document.getElementById('res-dislikes').textContent = data.Dislikes;
+            document.getElementById('res-accepted').textContent = data.TotalAccepted;
+            document.getElementById('res-submissions').textContent = data.TotalSubmissions;
+
+            const tagsContainer = document.getElementById('res-tags');
+            tagsContainer.innerHTML = ''; 
+            if(data.Tags && data.Tags.length > 0) {
+                data.Tags.forEach(tag => {
+                    const tagDiv = document.createElement('div');
+                    tagDiv.className = 'tag';
+                    tagDiv.textContent = tag;
+                    tagsContainer.appendChild(tagDiv);
+                });
+            } else {
+                tagsContainer.innerHTML = '<div class="tag">None</div>';
+            }
+
+            // Reveal Dashboard and Scroll
+            dashboard.style.display = 'block';
+            
+            setTimeout(() => {
+                dashboard.classList.add('active');
+                window.location.href = '#result';
+            }, 50);
+
+        } catch (error) {
+            console.error("Fetch API Error:", error);
+            // Redirect to the external error page and pass the REST error message as a query parameter
+            window.location.href = `/api-error?message=${encodeURIComponent(error.message)}`;
+        } finally {
+            // Revert Loading State
+            submitBtn.disabled = false;
+            btnText.textContent = 'Get Rating';
+            btnLoader.style.display = 'none';
+        }
+    });
+</script>
+
 </body>
 </html>
