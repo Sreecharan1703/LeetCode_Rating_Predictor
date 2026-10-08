@@ -5,90 +5,167 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Error - LeetcodePredictor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-main: #151419;
-      --bg-card: #1c1b22;
-      --text-main: #FFFFFF;
-      --danger: #ff4d4f;
-      --accent: #027CFF;
+      --bg: #F4F5F9;
+      --surface: #FFFFFF;
+      --ink: #12141C;
+      --muted: #5E6475;
+      --line: #E1E3EC;
+      --dot: rgba(18, 20, 28, 0.09);
+      --accent: #5A3FFF;
+      --accent-hover: #4A30EB;
+      --accent-soft: rgba(90, 63, 255, 0.10);
+      --on-accent: #FFFFFF;
+      --danger: #D92D3A;
+      --danger-ink: #A61B27;
+      --danger-soft: rgba(217, 45, 58, 0.08);
+      --danger-line: rgba(217, 45, 58, 0.28);
+      --shadow: 0 1px 2px rgba(18, 20, 28, 0.04), 0 12px 32px -8px rgba(18, 20, 28, 0.10);
+      --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+      --font-body: 'Instrument Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0D0F16;
+        --surface: #151824;
+        --ink: #F2F3F8;
+        --muted: #9AA1B5;
+        --line: #272B3C;
+        --dot: rgba(255, 255, 255, 0.07);
+        --accent: #8F7DFF;
+        --accent-hover: #A294FF;
+        --accent-soft: rgba(143, 125, 255, 0.14);
+        --on-accent: #0D0F16;
+        --danger: #FF6B73;
+        --danger-ink: #FFB3B8;
+        --danger-soft: rgba(255, 107, 115, 0.10);
+        --danger-line: rgba(255, 107, 115, 0.30);
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px -8px rgba(0, 0, 0, 0.55);
+      }
     }
     * { box-sizing: border-box; }
+    html { background: var(--bg); }
     body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      font-family: 'Gilroy', 'Poppins', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
       margin: 0;
-      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--ink);
+      background: transparent;
+      -webkit-font-smoothing: antialiased;
     }
-    .gaming-card {
-      background-color: var(--bg-card);
-      padding: 45px 35px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 77, 79, 0.2);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-      width: 100%;
-      max-width: 450px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .gaming-card::before {
+    body::before {
       content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background-color: var(--danger);
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image:
+        radial-gradient(60% 45% at 50% 0%, var(--accent-soft), transparent 70%),
+        radial-gradient(circle at 1px 1px, var(--dot) 1px, transparent 0);
+      background-size: 100% 100%, 28px 28px;
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+    }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+    .topbar { width: min(1040px, 100%); margin: 0 auto; padding: 22px 20px 0; }
+    .brand {
+      display: inline-flex; align-items: center; gap: 10px;
+      color: var(--ink); text-decoration: none;
+      font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: -0.01em;
+    }
+    .brand-mark {
+      width: 32px; height: 32px; border-radius: 10px;
+      display: grid; place-items: center;
+      background: var(--accent); color: var(--on-accent);
+    }
+
+    main { flex: 1; display: grid; place-items: center; padding: 20px; }
+
+    .gaming-card {
+      width: 100%;
+      max-width: 520px;
+      padding: clamp(28px, 6vw, 44px);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
     }
     .error-icon {
-      font-size: 50px;
-      margin-bottom: 10px;
+      width: 56px; height: 56px;
+      display: grid; place-items: center;
+      margin-bottom: 22px;
+      border-radius: 16px;
+      background: var(--danger-soft);
+      border: 1px solid var(--danger-line);
+      color: var(--danger);
     }
     h2 {
-      margin-top: 0;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
+      margin: 0;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.7rem, 5vw, 2.2rem);
+      line-height: 1.12;
+      letter-spacing: -0.025em;
+      text-wrap: balance;
     }
+    .error-lead { margin: 12px 0 0; color: var(--muted); }
     .error-message {
+      margin: 14px 0 30px;
+      padding: 16px 18px;
+      border-radius: 14px;
+      background: var(--danger-soft);
+      border: 1px solid var(--danger-line);
+      color: var(--danger-ink);
       font-size: 15px;
-      color: var(--danger);
-      background-color: rgba(255, 77, 79, 0.1);
-      border: 1px solid rgba(255, 77, 79, 0.2);
-      padding: 16px;
-      border-radius: 8px;
-      margin: 25px 0;
+      overflow-wrap: anywhere;
     }
     .btn-outline {
-      display: inline-block;
-      background-color: transparent;
-      color: var(--accent);
-      border: 2px solid var(--accent);
-      text-decoration: none;
-      padding: 12px 28px;
-      border-radius: 8px;
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 14px 26px;
+      border-radius: 12px;
+      background: var(--accent);
+      color: var(--on-accent);
       font-weight: 600;
-      transition: all 0.3s ease;
+      text-decoration: none;
+      transition: background 0.2s ease, transform 0.15s ease;
     }
-    .btn-outline:hover {
-      background-color: var(--accent);
-      color: var(--text-main);
-    }
+    .btn-outline:hover { background: var(--accent-hover); }
+    .btn-outline:active { transform: scale(0.98); }
+    @media (max-width: 480px) { .btn-outline { width: 100%; } }
+    @media (prefers-reduced-motion: reduce) { .btn-outline { transition: none; } }
   </style>
 </head>
 <body>
-<div class="gaming-card">
-  <div class="error-icon">⚠️</div>
-  <h2>Congrats,You found a Wild Error!</h2>
-  <div class="error-message" th:text="${message}">
-    Default error message fallback
+<header class="topbar">
+  <a class="brand" href="/">
+    <span class="brand-mark" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 19v-5M12 19V9M18 19V5"/></svg>
+    </span>
+    LeetcodePredictor
+  </a>
+</header>
+
+<main>
+  <div class="gaming-card">
+    <div class="error-icon" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+    </div>
+    <h2>Congrats, you found a wild error!</h2>
+    <p class="error-lead">Here's what went wrong:</p>
+    <div class="error-message" th:text="${message}">
+      Default error message fallback
+    </div>
+    <a href="/" class="btn-outline">Return to Search</a>
   </div>
-  <a href="/" class="btn-outline">Return to Search</a>
-</div>
+</main>
 </body>
 </html>

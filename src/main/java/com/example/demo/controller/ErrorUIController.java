@@ -15,7 +15,7 @@ public class ErrorUIController implements ErrorController {
         if(status != null){
             int statusCode = Integer.parseInt(status.toString());
             if (statusCode == 404) {
-                model.addAttribute("message", "Nah,This page doesn't exist.");
+                model.addAttribute("message", "Nah, This page doesn't exist.");
             } else if (statusCode == 500) {
                 model.addAttribute("message", "Internal server error. Our backend is sleeping.");
             } else {
