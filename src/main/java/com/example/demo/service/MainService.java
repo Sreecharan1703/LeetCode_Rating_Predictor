@@ -12,7 +12,7 @@ import java.util.Map;
 import static java.lang.Double.parseDouble;
 
 @Service
-//@EnableCaching
+@EnableCaching
 public class MainService {
     LeetcodeScraperService leetcodeScraperService;
     MainService(LeetcodeScraperService leetcodeScraperService) {
@@ -63,28 +63,27 @@ public class MainService {
         return outputData;
     }
 
-//    @Cacheable(value = "Ratings",key = "#id")
+    @Cacheable(value = "Ratings",key = "#id")
     public String getRating(String query,String id){
         return predictValue(query);
     }
 
     public String predictValue(String query){
-        return "1111";
-//        try{
-//            ProcessBuilder pb = new ProcessBuilder("python3","ml_requirements/mlPredictor.py",query);
-//            pb.redirectErrorStream(true);
-//            Process p = pb.start();
-//
-//            String result = new String(p.getInputStream().readAllBytes()).trim();
-//
-//            int exitcode = p.waitFor();
-//            if(exitcode != 0){
-//                return "Python Crashed. Log:\n" + result;
-//            }
-//            return result;
-//        }
-//        catch(Exception e){
-//            throw new RuntimeException(e);
-//        }
+        try{
+            ProcessBuilder pb = new ProcessBuilder("python3","ml_requirements/mlPredictor.py",query);
+            pb.redirectErrorStream(true);
+            Process p = pb.start();
+
+            String result = new String(p.getInputStream().readAllBytes()).trim();
+
+            int exitcode = p.waitFor();
+            if(exitcode != 0){
+                return "Python Crashed. Log:\n" + result;
+            }
+            return result;
+        }
+        catch(Exception e){
+            throw new RuntimeException(e);
+        }
     }
 }
