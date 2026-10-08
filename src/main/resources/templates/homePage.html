@@ -213,7 +213,6 @@
             const response = await fetch(`/api/search?id=${problemId}`);
             
             if (!response.ok) {
-                // The GlobalRestExceptionHandler returns a JSON map containing "message"[cite: 1].
                 const errorData = await response.json();
                 throw new Error(errorData.message || "An unexpected error occurred.");
             }
@@ -252,7 +251,6 @@
             }, 50);
 
         } catch (error) {
-            console.error("Fetch API Error:", error);
             // Redirect to the external error page and pass the REST error message as a query parameter
             window.location.href = `/api-error?message=${encodeURIComponent(error.message)}`;
         } finally {
