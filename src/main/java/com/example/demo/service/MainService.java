@@ -37,7 +37,6 @@ public class MainService {
         Map<String,Object> mp = LeetcodeScraperService.getLeetCodeData(id);
 
         List<String> topiclist = (List<String>) mp.get("TopicTags");
-        String topicString = convertListtoString(topiclist);
 
         Data outputData = new Data();
         outputData.setId((String)mp.get("ID"));
@@ -50,12 +49,7 @@ public class MainService {
         outputData.setTotalSubmissions(String.valueOf(mp.get("TotalSubmissions")));
         outputData.setTags(topiclist);
 
-        String query = mp.get("ID") + "," + mp.get("Likes") + "," + mp.get("Dislikes") +
-                "," + mp.get("Difficulty") + "," + mp.get("AcceptanceRate") +
-                "," + mp.get("TotalAccepted") + "," + mp.get("TotalSubmissions") +
-                "," + topicString;
-
-        String rating = getRating(query,(String)mp.get("ID"));
+        String rating = getRating(mp,(String)mp.get("ID"),topiclist);
         double rating_num = parseDouble(rating);
         int rating_in_int = (int) rating_num;
         outputData.setRating(Integer.toString(rating_in_int));
@@ -64,7 +58,13 @@ public class MainService {
     }
 
     @Cacheable(value = "Ratings",key = "#id")
-    public String getRating(String query,String id){
+    public String getRating(Map<String,Object> mp,String id,List<String> topiclist){
+        String topicString = convertListtoString(topiclist);
+        String query = mp.get("ID") + "," + mp.get("Likes") + "," + mp.get("Dislikes") +
+                "," + mp.get("Difficulty") + "," + mp.get("AcceptanceRate") +
+                "," + mp.get("TotalAccepted") + "," + mp.get("TotalSubmissions") +
+                "," + topicString;
+
         return predictValue(query);
     }
 
