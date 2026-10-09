@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LeetCode Rating Predictor</title>
+    <title>LeetcodePredictor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -21,9 +21,6 @@
             --accent-soft: rgba(90, 63, 255, 0.10);
             --on-accent: #FFFFFF;
             --shadow: 0 1px 2px rgba(18, 20, 28, 0.04), 0 12px 32px -8px rgba(18, 20, 28, 0.10);
-            --warn-bg: rgba(217, 140, 20, 0.10);
-            --warn-line: rgba(217, 140, 20, 0.35);
-            --warn-ink: #7A4B00;
             --lvl-easy: #14956A;
             --lvl-medium: #B7791F;
             --lvl-hard: #D92D3A;
@@ -45,9 +42,6 @@
                 --accent-soft: rgba(143, 125, 255, 0.14);
                 --on-accent: #0D0F16;
                 --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px -8px rgba(0, 0, 0, 0.55);
-                --warn-bg: rgba(245, 196, 81, 0.09);
-                --warn-line: rgba(245, 196, 81, 0.30);
-                --warn-ink: #F5C77A;
                 --lvl-easy: #4ADE9F;
                 --lvl-medium: #F5C451;
                 --lvl-hard: #FF7A82;
@@ -55,7 +49,6 @@
         }
 
         * { box-sizing: border-box; }
-        [hidden] { display: none !important; }
         html { scroll-behavior: smooth; background: var(--bg); }
 
         body {
@@ -69,7 +62,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Soft dot grid that fades out toward the bottom */
         body::before {
             content: '';
             position: fixed;
@@ -91,6 +83,7 @@
             width: min(1040px, 100%);
             margin: 0 auto;
             padding: 22px 20px 0;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
         }
         .brand {
             display: inline-flex; align-items: center; gap: 10px;
@@ -102,22 +95,30 @@
             display: grid; place-items: center;
             background: var(--accent); color: var(--on-accent);
         }
+        .nav { display: flex; gap: 4px; }
+        .nav a {
+            padding: 8px 12px;
+            border-radius: 10px;
+            color: var(--muted);
+            font-size: 14px; font-weight: 500;
+            text-decoration: none;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .nav a:hover { background: var(--accent-soft); color: var(--ink); }
 
-        /* Sections */
+        /* Hero */
         .section-container {
             width: min(1040px, 100%);
+            min-height: calc(100vh - 70px);
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px 20px 60px;
             display: flex;
             align-items: center;
         }
-        #search { min-height: calc(100vh - 70px); }
-        #result { align-items: flex-start; padding-top: 8px; padding-bottom: 80px; }
-
-        /* Hero */
-        .hero-inner { width: 100%; max-width: 760px; }
+        .hero-inner { width: 100%; }
         .hero-title {
             margin: 0;
+            max-width: 760px;
             font-family: var(--font-display);
             font-weight: 700;
             font-size: clamp(2.2rem, 6vw, 3.8rem);
@@ -126,7 +127,7 @@
             text-wrap: balance;
         }
         .hero-sub {
-            margin: 18px 0 36px;
+            margin: 18px 0 14px;
             display: flex; align-items: center; gap: 10px;
             font-family: var(--font-display);
             font-weight: 500;
@@ -134,409 +135,141 @@
             letter-spacing: -0.015em;
             color: var(--accent);
         }
+        .hero-note { margin: 0 0 40px; max-width: 540px; color: var(--muted); font-size: 17px; }
 
-        /* Search form */
-        .search-card { width: 100%; }
-        form {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: 18px;
-            box-shadow: var(--shadow);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        form:focus-within {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px var(--accent-soft), var(--shadow);
-        }
-        input[type="number"] {
-            flex: 1;
-            min-width: 0;
-            padding: 14px 16px;
-            border: none;
-            background: transparent;
-            color: var(--ink);
-            font-family: inherit;
-            font-size: 17px;
-            outline: none;
-            -moz-appearance: textfield;
-            appearance: textfield;
-        }
-        input[type="number"]::placeholder { color: var(--muted); opacity: 0.8; }
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
-        .submit-btn {
-            display: inline-flex; justify-content: center; align-items: center; gap: 10px;
-            padding: 14px 24px;
-            border: none;
-            border-radius: 12px;
-            background: var(--accent);
-            color: var(--on-accent);
-            font-family: inherit;
-            font-size: 16px;
-            font-weight: 600;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.15s ease;
-        }
-        .submit-btn:hover { background: var(--accent-hover); }
-        .submit-btn:active { transform: scale(0.98); }
-        .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
-
-        .search-hint { margin: 14px 4px 0; font-size: 14px; color: var(--muted); }
-
-        /* Loader */
-        .loader {
-            width: 18px; height: 18px;
-            border: 3px solid currentColor;
-            border-right-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            display: none;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Result dashboard */
-        .dashboard-container {
-            display: none;
-            width: 100%;
-            padding: clamp(20px, 4vw, 40px);
+        /* Two options */
+        .options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+        .option {
+            display: flex; flex-direction: column;
+            padding: clamp(22px, 3.5vw, 32px);
             background: var(--surface);
             border: 1px solid var(--line);
             border-radius: 24px;
             box-shadow: var(--shadow);
-        }
-        .dashboard-container.active { display: block; }
-
-        .header {
-            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
-            gap: 14px;
-            margin-bottom: 28px;
-        }
-        .header h2 {
-            margin: 0;
-            font-family: var(--font-display);
-            font-size: clamp(1.4rem, 3.4vw, 2rem);
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            line-height: 1.15;
-        }
-        .difficulty {
-            --lvl: var(--accent);
-            padding: 6px 14px;
-            border-radius: 999px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--lvl);
-            background: color-mix(in srgb, var(--lvl) 14%, transparent);
-            border: 1px solid color-mix(in srgb, var(--lvl) 35%, transparent);
-        }
-        .difficulty[data-level="easy"] { --lvl: var(--lvl-easy); }
-        .difficulty[data-level="medium"] { --lvl: var(--lvl-medium); }
-        .difficulty[data-level="hard"] { --lvl: var(--lvl-hard); }
-
-        .stat-label { font-size: 14px; font-weight: 500; color: var(--muted); }
-        .stat-value { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
-
-        /* Rating hero */
-        .rating-box {
-            padding: clamp(20px, 3.5vw, 32px);
-            margin-bottom: 28px;
-            background: var(--accent-soft);
-            border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
-            border-radius: 18px;
-        }
-        .rating-box .stat-value {
-            margin: 4px 0 26px;
-            font-size: clamp(3.6rem, 11vw, 6rem);
-            line-height: 1;
-            letter-spacing: -0.04em;
-            color: var(--ink);
-        }
-        .meter-track {
-            position: relative;
-            height: 10px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, #34C48B 0%, #F2C14E 35%, #F28C38 50%, #E5484D 80%);
-        }
-        .meter-marker {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 22px; height: 22px;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            background: var(--surface);
-            border: 4px solid var(--ink);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-            transition: left 1.1s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .meter-scale {
-            display: flex; justify-content: space-between;
-            margin-top: 10px;
-            font-size: 13px; color: var(--muted);
-        }
-
-        /* Stats ledger */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            column-gap: 40px;
-            margin-bottom: 32px;
-        }
-        .stat-box {
-            display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
-            padding: 16px 0;
-            border-bottom: 1px solid var(--line);
-        }
-        .stat-box .stat-value { font-size: 1.35rem; letter-spacing: -0.01em; }
-        .stat-box:last-child:nth-child(odd) { grid-column: 1 / -1; }
-
-        /* Tags */
-        .tags-title { margin-bottom: 12px; }
-        .tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
-        .tag {
-            padding: 6px 14px;
-            border-radius: 999px;
-            background: var(--surface-2);
-            border: 1px solid var(--line);
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        /* Disclaimer */
-        .disclaimer-box {
-            padding: 16px 20px;
-            margin-bottom: 28px;
-            border-radius: 14px;
-            background: var(--warn-bg);
-            border: 1px solid var(--warn-line);
-            color: var(--warn-ink);
-            font-size: 14px;
-        }
-        .disclaimer-box ul { margin: 0; padding-left: 20px; }
-        .disclaimer-box li + li { margin-top: 6px; }
-
-        .scroll-btn {
-            display: inline-block;
-            padding: 12px 22px;
-            border-radius: 12px;
-            border: 1px solid var(--line);
-            background: var(--surface-2);
-            color: var(--ink);
-            font-weight: 600;
+            color: inherit;
             text-decoration: none;
-            transition: border-color 0.2s ease, background 0.2s ease;
+            transition: border-color 0.2s ease, transform 0.2s ease;
         }
-        .scroll-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
-
-        @media (max-width: 600px) {
-            form { flex-direction: column; align-items: stretch; }
-            input[type="number"] { padding: 14px 12px; }
-            .submit-btn { width: 100%; }
-            .stats-grid { grid-template-columns: 1fr; }
+        .option:hover { border-color: var(--accent); transform: translateY(-3px); }
+        .option-icon {
+            width: 48px; height: 48px;
+            display: grid; place-items: center;
+            margin-bottom: 22px;
+            border-radius: 14px;
+            background: var(--accent-soft);
+            color: var(--accent);
         }
+        .option h2 {
+            margin: 0 0 8px;
+            font-family: var(--font-display);
+            font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
+        }
+        .option p { margin: 0 0 26px; color: var(--muted); max-width: 40ch; }
 
+        /* Small previews of what each tool gives you */
+        .preview {
+            margin-top: auto;
+            margin-bottom: 26px;
+            padding: 18px;
+            border-radius: 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+        }
+        .mini-meter { position: relative; height: 8px; border-radius: 999px; background: linear-gradient(90deg, #34C48B 0%, #F2C14E 40%, #F28C38 70%, #E5484D 100%); }
+        .mini-meter span {
+            position: absolute; top: 50%; left: 62%;
+            width: 18px; height: 18px; transform: translate(-50%, -50%);
+            border-radius: 50%; background: var(--surface); border: 4px solid var(--ink);
+        }
+        .mini-meter-label { display: flex; justify-content: space-between; margin-top: 12px; font-size: 13px; color: var(--muted); }
+        .mini-row { display: flex; align-items: center; gap: 12px; }
+        .mini-row + .mini-row { margin-top: 12px; }
+        .mini-line { flex: 1; height: 10px; border-radius: 999px; background: var(--line); }
+        .mini-row:nth-child(2) .mini-line { max-width: 70%; }
+        .mini-pill { width: 44px; height: 22px; border-radius: 999px; background: color-mix(in srgb, var(--lvl-medium) 22%, transparent); border: 1px solid color-mix(in srgb, var(--lvl-medium) 40%, transparent); }
+        .mini-row:nth-child(2) .mini-pill { background: color-mix(in srgb, var(--lvl-easy) 22%, transparent); border-color: color-mix(in srgb, var(--lvl-easy) 40%, transparent); }
+        .mini-btn { width: 52px; height: 22px; border-radius: 8px; background: var(--accent-soft); }
+
+        .option-cta {
+            align-self: flex-start;
+            padding: 13px 24px;
+            border-radius: 12px;
+            background: var(--accent);
+            color: var(--on-accent);
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+        .option:hover .option-cta { background: var(--accent-hover); }
+
+        @media (max-width: 760px) {
+            .options { grid-template-columns: 1fr; }
+            .nav a { padding: 8px 10px; }
+        }
+        @media (max-width: 460px) {
+            .nav { display: none; }
+        }
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
-            .meter-marker, .submit-btn, form { transition: none; }
-            .loader { animation-duration: 2s; }
+            .option, .option-cta, .nav a { transition: none; }
+            .option:hover { transform: none; }
         }
     </style>
 </head>
 <body>
 
 <header class="topbar">
-    <a class="brand" href="/">
+    <a class="brand" href="/" th:href="@{/}">
         <span class="brand-mark" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 19v-5M12 19V9M18 19V5"/></svg>
         </span>
         LeetcodePredictor
     </a>
+    <nav class="nav" aria-label="Main">
+        <a href="/rating" th:href="@{/rating}">Predict rating</a>
+        <a href="/profile" th:href="@{/profile}">Recommendations</a>
+    </nav>
 </header>
 
 <main>
-<div id="search" class="section-container">
+<div class="section-container">
     <div class="hero-inner">
-        <h1 class="hero-title">Wanna grind LeetCode but don't know how hard the problem is?</h1>
+        <h1 class="hero-title">Wanna grind LeetCode but don't know where to start?</h1>
         <p class="hero-sub">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
             Here's a gift for you.
         </p>
+        <p class="hero-note">Check how hard a problem really is, or get a list of problems picked for you.</p>
 
-        <div class="search-card">
-            <form id="predictionForm">
-                <label for="problemId" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">LeetCode problem ID</label>
-                <input type="number" id="problemId" name="id" min="1" placeholder="Enter LeetCode Q.ID (e.g. 1234)" required/>
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    <span class="btn-text">Get Rating</span>
-                    <div class="loader" id="btnLoader"></div>
-                </button>
-            </form>
-            <p class="search-hint">Use the number shown before the problem title on LeetCode.</p>
+        <div class="options">
+            <a class="option" href="/rating" th:href="@{/rating}">
+                <div class="option-icon" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14l4-4"/><path d="M3.3 17a9 9 0 1 1 17.4 0"/></svg>
+                </div>
+                <h2>Predict a problem's rating</h2>
+                <p>Enter a question number to see its estimated rating, acceptance rate and topic tags.</p>
+                <div class="preview" aria-hidden="true">
+                    <div class="mini-meter"><span></span></div>
+                    <div class="mini-meter-label"><span>Easier</span><span>Harder</span></div>
+                </div>
+                <span class="option-cta">Predict rating</span>
+            </a>
+
+            <a class="option" href="/profile" th:href="@{/profile}">
+                <div class="option-icon" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+                </div>
+                <h2>Get recommendations</h2>
+                <p>Enter your LeetCode username to see your contest stats and problems picked for you.</p>
+                <div class="preview" aria-hidden="true">
+                    <div class="mini-row"><span class="mini-line"></span><span class="mini-pill"></span><span class="mini-btn"></span></div>
+                    <div class="mini-row"><span class="mini-line"></span><span class="mini-pill"></span><span class="mini-btn"></span></div>
+                </div>
+                <span class="option-cta">Get recommendations</span>
+            </a>
         </div>
-    </div>
-</div>
-
-<div id="result" class="section-container">
-    <div class="dashboard-container" id="dashboard">
-        <div class="header">
-            <h2 id="res-title" th:text="${Id} != null ? ${Id} + '. ' +${Title} : 'Problem Title'">Problem Title</h2>
-            <span class="difficulty" id="res-difficulty" th:text="${Difficulty} ?: 'Unknown'">Unknown</span>
-        </div>
-
-        <div class="rating-box">
-            <div class="stat-label">Estimated Rating</div>
-            <div class="stat-value" id="res-rating" th:text="${Rating} ?: '0'">0</div>
-            <div class="meter" aria-hidden="true">
-                <div class="meter-track"><span class="meter-marker" id="meterMarker" hidden></span></div>
-                <div class="meter-scale"><span>Easier</span><span>Harder</span></div>
-            </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="stat-label">Acceptance Rate</div>
-                <div class="stat-value" id="res-acceptance" th:text="${AcceptanceRate} ?: '0%'">0%</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Likes</div>
-                <div class="stat-value" id="res-likes" th:text="${Likes} ?: '0'">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Dislikes</div>
-                <div class="stat-value" id="res-dislikes" th:text="${Dislikes} ?: '0'">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Total Accepted</div>
-                <div class="stat-value" id="res-accepted" th:text="${TotalAccepted} ?: '0'">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Total Submissions</div>
-                <div class="stat-value" id="res-submissions" th:text="${TotalSubmissions} ?: '0'">0</div>
-            </div>
-        </div>
-
-        <div class="stat-label tags-title">Topic Tags</div>
-        <div class="tags-container" id="res-tags">
-            <div class="tag" th:each="tag : ${Tags}" th:text="${tag}">Tag</div>
-        </div>
-
-        <div class="disclaimer-box">
-            <ul>
-                <li><strong>Note:</strong> Rating is estimated and may vary by ±120 points.</li>
-                <li><strong>Warning:</strong> 85% accurate. Can be skewed by submission spamming.</li>
-            </ul>
-        </div>
-
-        <a href="#search" class="scroll-btn">&uarr; New Search</a>
     </div>
 </div>
 </main>
-
-<script>
-    const RATING_MIN = 1000;
-    const RATING_MAX = 3000;
-
-    // Colors the difficulty chip (Easy / Medium / Hard)
-    function setDifficultyLevel() {
-        const el = document.getElementById('res-difficulty');
-        el.dataset.level = (el.textContent || '').trim().toLowerCase();
-    }
-
-    // Returns where the rating sits on the meter (0-100), or null if it isn't a usable number
-    function getRatingPercent() {
-        const raw = (document.getElementById('res-rating').textContent || '').replace(/[^\d.]/g, '');
-        const value = parseFloat(raw);
-        if (isNaN(value) || value <= 0) return null;
-        const ratio = (value - RATING_MIN) / (RATING_MAX - RATING_MIN);
-        return Math.min(1, Math.max(0, ratio)) * 100;
-    }
-
-    setDifficultyLevel();
-
-    document.getElementById('predictionForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const problemId = document.getElementById('problemId').value;
-        const submitBtn = document.getElementById('submitBtn');
-        const btnText = document.querySelector('.btn-text');
-        const btnLoader = document.getElementById('btnLoader');
-        const dashboard = document.getElementById('dashboard');
-        const marker = document.getElementById('meterMarker');
-
-        // Reset UI State
-        dashboard.classList.remove('active');
-        dashboard.style.display = 'none';
-
-        // Enter Loading State
-        submitBtn.disabled = true;
-        btnText.textContent = 'Predicting...';
-        btnLoader.style.display = 'block';
-
-        try {
-            const response = await fetch(`/api/search?id=${problemId}`);
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "An unexpected error occurred.");
-            }
-
-            const data = await response.json();
-
-            // Inject Data into DOM
-            document.getElementById('res-title').textContent = `${data.Id}. ${data.Title}`;
-            document.getElementById('res-difficulty').textContent = data.Difficulty;
-            document.getElementById('res-rating').textContent = data.Rating;
-            document.getElementById('res-acceptance').textContent = data.AcceptanceRate;
-            document.getElementById('res-likes').textContent = data.Likes;
-            document.getElementById('res-dislikes').textContent = data.Dislikes;
-            document.getElementById('res-accepted').textContent = data.TotalAccepted;
-            document.getElementById('res-submissions').textContent = data.TotalSubmissions;
-
-            setDifficultyLevel();
-
-            const tagsContainer = document.getElementById('res-tags');
-            tagsContainer.innerHTML = '';
-            if(data.Tags && data.Tags.length > 0) {
-                data.Tags.forEach(tag => {
-                    const tagDiv = document.createElement('div');
-                    tagDiv.className = 'tag';
-                    tagDiv.textContent = tag;
-                    tagsContainer.appendChild(tagDiv);
-                });
-            } else {
-                tagsContainer.innerHTML = '<div class="tag">None</div>';
-            }
-
-            // Park the rating marker at the start, then reveal the dashboard
-            const pct = getRatingPercent();
-            marker.hidden = (pct === null);
-            marker.style.left = '0%';
-            dashboard.style.display = 'block';
-            void marker.offsetWidth; // flush styles so the marker slide animates
-
-            setTimeout(() => {
-                dashboard.classList.add('active');
-                if (pct !== null) marker.style.left = pct + '%';
-                window.location.href = '#result';
-            }, 50);
-
-        } catch (error) {
-            // Redirect to the external error page and pass the REST error message as a query parameter
-            window.location.href = `/api-error?message=${encodeURIComponent(error.message)}`;
-        } finally {
-            // Revert Loading State
-            submitBtn.disabled = false;
-            btnText.textContent = 'Get Rating';
-            btnLoader.style.display = 'none';
-        }
-    });
-</script>
 
 </body>
 </html>

@@ -24,8 +24,8 @@ public class QueryController {
         return mainService.getDetails(number_id);
     }
 
-    @GetMapping("/user/{userId}")
-    public UserData getUserDetails(@PathVariable String userId){
+    @GetMapping("/api/user")
+    public UserData getUserDetails(@RequestParam("userId") String userId){
         return userService.getUser(userId);
     }
 }
