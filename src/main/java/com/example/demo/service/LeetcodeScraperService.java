@@ -60,7 +60,7 @@ public class LeetcodeScraperService {
 
     private static Map<String, Object> fetchGraphQLData(String titleSlug){
         String query = """
-            query questionData($titleSlug: String!) {
+            query questionRepo($titleSlug: String!) {
               question(titleSlug: $titleSlug) {
                 questionFrontendId
                 title
@@ -121,10 +121,79 @@ public class LeetcodeScraperService {
             result.put("AcceptanceRate", statsNode.path("acRate").asText());
             result.put("TotalAccepted", statsNode.path("totalAcceptedRaw").asLong());
             result.put("TotalSubmissions", statsNode.path("totalSubmissionRaw").asLong());
+            result.put("TitleSlug",titleSlug);
             
             return result;
         }
         catch(Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Map<String, Object> getUserContestRating(String userId) {
+        // 1. Update the query to also fetch 'matchedUser'
+        String query = """
+        query getContestRankingData($username: String!) {
+          matchedUser(username: $username) {
+            username
+          }
+          userContestRanking(username: $username) {
+            attendedContestsCount
+            rating
+            globalRanking
+            totalParticipants
+            topPercentage
+          }
+        }
+        """;
+
+        Map<String, Object> payloadMap = new HashMap<>();
+        payloadMap.put("query", query);
+
+        Map<String, String> variables = new HashMap<>();
+        variables.put("username", userId);
+        payloadMap.put("variables", variables);
+
+        try {
+            String jsonPayload = mapper.writeValueAsString(payloadMap);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://leetcode.com/graphql"))
+                    .header("User-Agent", USER_AGENT)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                throw new RuntimeException("Failed to fetch contest ranking data. HTTP " + response.statusCode());
+            }
+
+            JsonNode root = mapper.readTree(response.body());
+            JsonNode dataNode = root.path("data");
+
+            // 2. Check if the user exists at all
+            JsonNode matchedUserNode = dataNode.path("matchedUser");
+            if (matchedUserNode.isMissingNode() || matchedUserNode.isNull()) {
+                throw new ResourceNotFoundException("User with Id '" + userId + "' does not exist.");
+            }
+
+            JsonNode rankingNode = dataNode.path("userContestRanking");
+            if (rankingNode.isMissingNode() || rankingNode.isNull()) {
+                // User is valid, but has never participated in a contest
+                return new HashMap<>();
+            }
+
+            // 4. User is valid and has contest data
+            Map<String, Object> result = new HashMap<>();
+            result.put("attendedContestsCount", rankingNode.path("attendedContestsCount").asInt());
+            result.put("rating", rankingNode.path("rating").asDouble());
+            result.put("globalRanking", rankingNode.path("globalRanking").asInt());
+            result.put("totalParticipants", rankingNode.path("totalParticipants").asInt());
+            result.put("topPercentage", rankingNode.path("topPercentage").asDouble());
+
+            return result;
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

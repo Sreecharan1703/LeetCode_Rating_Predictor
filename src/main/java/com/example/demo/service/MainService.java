@@ -1,24 +1,22 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.Data;
+import com.example.demo.entity.Question;
+import com.example.demo.repository.QuestionRepo;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.lang.Double.parseDouble;
 
 @Service
 @EnableCaching
 public class MainService {
-    LeetcodeScraperService leetcodeScraperService;
-    MainService(LeetcodeScraperService leetcodeScraperService) {
-        this.leetcodeScraperService = leetcodeScraperService;
-    }
-
+    QuestionRepo questionRepo;
     private String convertListtoString(List<String> topiclist){
         if(topiclist.isEmpty()){
             return "[]";
@@ -49,23 +47,38 @@ public class MainService {
         outputData.setTotalSubmissions(String.valueOf(mp.get("TotalSubmissions")));
         outputData.setTags(topiclist);
 
-        String rating = getRating(mp,(String)mp.get("ID"),topiclist);
-        double rating_num = parseDouble(rating);
-        int rating_in_int = (int) rating_num;
-        outputData.setRating(Integer.toString(rating_in_int));
+        int rating = getRating(mp,(String)mp.get("ID"),topiclist);
+        outputData.setRating(Integer.toString(rating));
 
         return outputData;
     }
 
     @Cacheable(value = "Ratings",key = "#id")
-    public String getRating(Map<String,Object> mp,String id,List<String> topiclist){
+    public int getRating(Map<String,Object> mp,String id,List<String> topiclist){
+
+        Optional<Integer> rating = questionRepo.getQuestionRatingById(Integer.parseInt(id));
+        if(rating.isPresent()){
+            return rating.get();
+        }
+
         String topicString = convertListtoString(topiclist);
         String query = mp.get("ID") + "," + mp.get("Likes") + "," + mp.get("Dislikes") +
                 "," + mp.get("Difficulty") + "," + mp.get("AcceptanceRate") +
                 "," + mp.get("TotalAccepted") + "," + mp.get("TotalSubmissions") +
                 "," + topicString;
 
-        return predictValue(query);
+        String predictedRating = predictValue(query);
+        double rating_num = parseDouble(predictedRating);
+        int rating_in_int = (int) rating_num;
+
+        Question question = new Question();
+        question.setId(Integer.parseInt(id));
+        question.setRating(rating_in_int);
+        question.setTitle((String) mp.get("Title"));
+        question.setTitleSlug((String) mp.get("TitleSlug"));
+
+        questionRepo.save(question);
+        return rating_in_int;
     }
 
     public String predictValue(String query){
