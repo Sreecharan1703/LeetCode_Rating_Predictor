@@ -91,6 +91,7 @@
             width: min(1040px, 100%);
             margin: 0 auto;
             padding: 22px 20px 0;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
         }
         .brand {
             display: inline-flex; align-items: center; gap: 10px;
@@ -102,6 +103,17 @@
             display: grid; place-items: center;
             background: var(--accent); color: var(--on-accent);
         }
+        .nav { display: flex; gap: 4px; }
+        .nav a {
+            padding: 8px 12px;
+            border-radius: 10px;
+            color: var(--muted);
+            font-size: 14px; font-weight: 500;
+            text-decoration: none;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .nav a:hover { background: var(--accent-soft); color: var(--ink); }
+        .nav a[aria-current="page"] { background: var(--surface-2); color: var(--ink); }
 
         /* Sections */
         .section-container {
@@ -357,6 +369,10 @@
         </span>
         LeetcodePredictor
     </a>
+    <nav class="nav" aria-label="Main">
+        <a href="/rating" th:href="@{/rating}" aria-current="page">Predict rating</a>
+        <a href="/profile" th:href="@{/profile}" >Recommendations</a>
+    </nav>
 </header>
 
 <main>

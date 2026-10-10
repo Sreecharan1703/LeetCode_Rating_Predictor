@@ -16,7 +16,11 @@ import static java.lang.Double.parseDouble;
 @Service
 @EnableCaching
 public class MainService {
-    QuestionRepo questionRepo;
+    private final QuestionRepo questionRepo;
+    MainService(QuestionRepo questionRepo) {
+        this.questionRepo = questionRepo;
+    }
+
     private String convertListtoString(List<String> topiclist){
         if(topiclist.isEmpty()){
             return "[]";
