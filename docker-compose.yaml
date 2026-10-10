@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  lcPred:
+    build: .
+    image: lcpredictor-app:latest
+    container_name: lcpredictor-container
+    ports:
+      - "8080:8080"
+    networks:
+      - lc_pred
+    depends_on:
+      - mysql
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/lcPred?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  mysql:
+    image: mysql:latest
+    container_name: lcpred-mysql
+    environment:
+      MYSQL_DATABASE: lcPred
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    networks:
+      - lc_pred
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+networks:
+  lc_pred:
+    driver: bridge
+
+volumes:
+  mysql_data:
