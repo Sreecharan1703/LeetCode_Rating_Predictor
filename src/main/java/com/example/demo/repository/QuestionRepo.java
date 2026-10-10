@@ -15,7 +15,7 @@ public interface QuestionRepo extends JpaRepository<Question, Integer> {
     List<Question> findByRatingBetween(int minRating,int maxRating);
 
     default List<Question> getRecommendations(int userRating) {
-        return findByRatingBetween(userRating, userRating+200);
+        return findByRatingBetween(userRating-50, userRating+200);
     }
 
     @Query("SELECT e.rating FROM Question e WHERE e.id = :id")
