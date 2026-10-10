@@ -172,7 +172,6 @@ public class LeetcodeScraperService {
             JsonNode root = mapper.readTree(response.body());
             JsonNode dataNode = root.path("data");
 
-            // 2. Check if the user exists at all
             JsonNode matchedUserNode = dataNode.path("matchedUser");
             if (matchedUserNode.isMissingNode() || matchedUserNode.isNull()) {
                 throw new ResourceNotFoundException("User with Id '" + userId + "' does not exist.");
@@ -193,7 +192,11 @@ public class LeetcodeScraperService {
             result.put("topPercentage", rankingNode.path("topPercentage").asDouble());
 
             return result;
-        } catch (Exception e) {
+        }
+        catch(ResourceNotFoundException e) {
+            throw e;
+        }
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
