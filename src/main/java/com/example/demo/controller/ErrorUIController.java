@@ -25,6 +25,6 @@ public class ErrorUIController implements ErrorController {
         else{
             model.addAttribute("message", "Some complete unknown error from request");
         }
-        return "extraErrorPage";
+        return "defaultErrorPage";
     }
 }
