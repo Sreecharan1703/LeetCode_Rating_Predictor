@@ -201,16 +201,58 @@
         }
         .option:hover .option-cta { background: var(--accent-hover); }
 
+        [hidden] { display: none !important; }
+
+        /* Footer: view counts + credits */
+        .site-footer {
+            width: min(1040px, 100%);
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+        .footer-inner {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+            gap: 20px 32px;
+            padding-top: 28px;
+            border-top: 1px solid var(--line);
+        }
+        .views { display: flex; align-items: center; gap: 28px; }
+        .view-stat { display: flex; flex-direction: column; gap: 2px; }
+        .view-stat + .view-stat { padding-left: 28px; border-left: 1px solid var(--line); }
+        .view-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+        .view-value {
+            font-family: var(--font-display);
+            font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1;
+            font-variant-numeric: tabular-nums;
+        }
+        .credits {
+            margin: 0 0 0 auto;
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+            font-size: 15px; color: var(--muted);
+        }
+        .credits strong { color: var(--ink); font-weight: 600; }
+        .credit-link {
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--ink);
+            font-size: 14px; font-weight: 500;
+            text-decoration: none;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .credit-link:hover { border-color: var(--accent); background: var(--accent-soft); }
+
         @media (max-width: 760px) {
             .options { grid-template-columns: 1fr; }
             .nav a { padding: 8px 10px; }
+            .credits { margin-left: 0; }
         }
         @media (max-width: 460px) {
             .nav { display: none; }
         }
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
-            .option, .option-cta, .nav a { transition: none; }
+            .option, .option-cta, .nav a, .credit-link { transition: none; }
             .option:hover { transform: none; }
         }
     </style>
@@ -282,6 +324,55 @@
     </div>
 </div>
 </main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="views" id="viewStats" aria-live="polite" hidden>
+            <div class="view-stat">
+                <span class="view-label">Total views</span>
+                <span class="view-value" id="totalViews">0</span>
+            </div>
+            <div class="view-stat">
+                <span class="view-label">Views today</span>
+                <span class="view-value" id="todayViews">0</span>
+            </div>
+        </div>
+
+        <p class="credits">
+            <span>Made by <strong>Sreecharan</strong></span>
+            <a class="credit-link" href="https://www.linkedin.com/in/sreecharan-kesireddy" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <a class="credit-link" href="https://leetcode.com/u/sreecharan_17" target="_blank" rel="noopener noreferrer">LeetCode</a>
+        </p>
+    </div>
+</footer>
+
+<script>
+    const VIEWS_API = '/api/views';
+
+    (async function loadViews() {
+        let alreadyCounted = false;
+        try { alreadyCounted = sessionStorage.getItem('viewCounted') === '1'; } catch (e) {}
+
+        try {
+            const response = await fetch(VIEWS_API, { method: alreadyCounted ? 'GET' : 'POST' });
+            if (!response.ok) return;
+
+            const data = await response.json();
+            const total = Number(data.totalViews);
+            const today = Number(data.todayViews);
+            if (isNaN(total) || isNaN(today)) return;
+
+            document.getElementById('totalViews').textContent = total.toLocaleString();
+            document.getElementById('todayViews').textContent = today.toLocaleString();
+            document.getElementById('viewStats').hidden = false;
+
+            if (!alreadyCounted) {
+                try { sessionStorage.setItem('viewCounted', '1'); } catch (e) {}
+            }
+        } catch (e) {
+        }
+    })();
+</script>
 
 </body>
 </html>

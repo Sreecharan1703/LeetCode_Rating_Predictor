@@ -2,26 +2,29 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.Data;
 import com.example.demo.dto.UserData;
+import com.example.demo.dto.ViewDto;
 import com.example.demo.entity.Question;
 import com.example.demo.service.MainService;
 import com.example.demo.service.userService;
+import com.example.demo.service.ViewService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 public class QueryController {
     private final userService userService;
-    MainService mainService;
-    QueryController(MainService mainService, userService userService) {
+    private final MainService mainService;
+    private final ViewService viewService;
+
+    QueryController(MainService mainService, userService userService, ViewService viewService) {
         this.mainService = mainService;
         this.userService = userService;
+        this.viewService = viewService;
     }
+
 
     @GetMapping("/api/search")
     public Data search(@RequestParam("id") double problemId){
@@ -38,5 +41,15 @@ public class QueryController {
     public List<Question> getQuestionsInRange(@RequestParam("minRange") int minRange, @RequestParam("maxRange") int maxRange,@RequestParam("pageNumber") int pageNumber){
         Pageable pageable = PageRequest.of(pageNumber-1,10);
         return userService.getQuestionsInRange(minRange, maxRange, pageable);
+    }
+
+    @PostMapping("/api/views")
+    public ViewDto updateViews(){
+        return viewService.incrementAndGetView();
+    }
+
+    @GetMapping("/api/views")
+    public ViewDto getViews(){
+        return viewService.getView();
     }
 }
