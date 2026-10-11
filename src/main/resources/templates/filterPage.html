@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filter Problems - LeetcodePredictor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #F4F5F9;
+            --surface: #FFFFFF;
+            --surface-2: #F0F1F7;
+            --ink: #12141C;
+            --muted: #5E6475;
+            --line: #E1E3EC;
+            --dot: rgba(18, 20, 28, 0.09);
+            --accent: #5A3FFF;
+            --accent-hover: #4A30EB;
+            --accent-soft: rgba(90, 63, 255, 0.10);
+            --on-accent: #FFFFFF;
+            --shadow: 0 1px 2px rgba(18, 20, 28, 0.04), 0 12px 32px -8px rgba(18, 20, 28, 0.10);
+            --lvl-easy: #14956A;
+            --lvl-medium: #B7791F;
+            --lvl-hard: #D92D3A;
+            --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+            --font-body: 'Instrument Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0D0F16;
+                --surface: #151824;
+                --surface-2: #1C2030;
+                --ink: #F2F3F8;
+                --muted: #9AA1B5;
+                --line: #272B3C;
+                --dot: rgba(255, 255, 255, 0.07);
+                --accent: #8F7DFF;
+                --accent-hover: #A294FF;
+                --accent-soft: rgba(143, 125, 255, 0.14);
+                --on-accent: #0D0F16;
+                --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px -8px rgba(0, 0, 0, 0.55);
+                --lvl-easy: #4ADE9F;
+                --lvl-medium: #F5C451;
+                --lvl-hard: #FF7A82;
+            }
+        }
+
+        * { box-sizing: border-box; }
+        [hidden] { display: none !important; }
+        html { scroll-behavior: smooth; background: var(--bg); }
+
+        body {
+            margin: 0;
+            font-family: var(--font-body);
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--ink);
+            background: transparent;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background-image:
+                radial-gradient(60% 45% at 50% 0%, var(--accent-soft), transparent 70%),
+                radial-gradient(circle at 1px 1px, var(--dot) 1px, transparent 0);
+            background-size: 100% 100%, 28px 28px;
+            -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+        }
+
+        :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+        /* Top bar */
+        .topbar {
+            width: min(1040px, 100%);
+            margin: 0 auto;
+            padding: 22px 20px 0;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        }
+        .brand {
+            display: inline-flex; align-items: center; gap: 10px;
+            color: var(--ink); text-decoration: none;
+            font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: -0.01em;
+        }
+        .brand-mark {
+            width: 32px; height: 32px; border-radius: 10px;
+            display: grid; place-items: center;
+            background: var(--accent); color: var(--on-accent);
+        }
+        .nav { display: flex; gap: 4px; }
+        .nav a {
+            padding: 8px 12px;
+            border-radius: 10px;
+            color: var(--muted);
+            font-size: 14px; font-weight: 500;
+            text-decoration: none;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .nav a:hover { background: var(--accent-soft); color: var(--ink); }
+        .nav a[aria-current="page"] { background: var(--surface-2); color: var(--ink); }
+
+        /* Sections */
+        .section-container {
+            width: min(1040px, 100%);
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+        }
+        #search { min-height: calc(100vh - 70px); }
+        #result { align-items: flex-start; padding-top: 8px; padding-bottom: 80px; }
+
+        /* Hero */
+        .hero-inner { width: 100%; max-width: 760px; }
+        .hero-title {
+            margin: 0;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: clamp(2.2rem, 6vw, 3.8rem);
+            line-height: 1.06;
+            letter-spacing: -0.03em;
+            text-wrap: balance;
+        }
+        .hero-sub {
+            margin: 18px 0 36px;
+            display: flex; align-items: center; gap: 10px;
+            font-family: var(--font-display);
+            font-weight: 500;
+            font-size: clamp(1.2rem, 3vw, 1.6rem);
+            letter-spacing: -0.015em;
+            color: var(--accent);
+        }
+
+        /* Range form */
+        form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        form:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-soft), var(--shadow);
+        }
+        .range-fields { flex: 1; min-width: 0; display: flex; align-items: center; }
+        .range-sep { flex: none; color: var(--muted); font-size: 15px; }
+        input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            padding: 14px 16px;
+            border: none;
+            background: transparent;
+            color: var(--ink);
+            font-family: inherit;
+            font-size: 17px;
+            outline: none;
+        }
+        input[type="text"]::placeholder { color: var(--muted); opacity: 0.8; }
+
+        .submit-btn {
+            display: inline-flex; justify-content: center; align-items: center; gap: 10px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            background: var(--accent);
+            color: var(--on-accent);
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.15s ease;
+        }
+        .submit-btn:hover { background: var(--accent-hover); }
+        .submit-btn:active { transform: scale(0.98); }
+        .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .form-error { margin: 12px 4px 0; font-size: 14px; font-weight: 500; color: var(--lvl-hard); }
+
+        /* Quick range picks */
+        .presets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+        .presets-label { margin-right: 4px; font-size: 14px; color: var(--muted); }
+        .preset {
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--ink);
+            font-family: inherit;
+            font-size: 14px; font-weight: 500;
+            font-variant-numeric: tabular-nums;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .preset:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+        .loader {
+            width: 18px; height: 18px;
+            border: 3px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Result dashboard */
+        .dashboard-container {
+            display: none;
+            width: 100%;
+            padding: clamp(20px, 4vw, 40px);
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+        }
+        .dashboard-container.active { display: block; }
+
+        .header {
+            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+        .header h2 {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: clamp(1.4rem, 3.4vw, 2rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+        }
+        .page-chip {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            background: var(--accent-soft);
+            border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+        }
+
+        /* Question rows */
+        .rec-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+        .rec-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 16px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+        }
+        .rec-main { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+        .rec-id { color: var(--muted); font-weight: 500; margin-right: 4px; font-variant-numeric: tabular-nums; }
+        .rec-rating {
+            --lvl: var(--accent);
+            flex: none;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 14px; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            color: var(--lvl);
+            background: color-mix(in srgb, var(--lvl) 14%, transparent);
+            border: 1px solid color-mix(in srgb, var(--lvl) 35%, transparent);
+        }
+        .rec-rating[data-level="easy"] { --lvl: var(--lvl-easy); }
+        .rec-rating[data-level="medium"] { --lvl: var(--lvl-medium); }
+        .rec-rating[data-level="hard"] { --lvl: var(--lvl-hard); }
+
+        .solve-btn {
+            flex: none;
+            padding: 9px 18px;
+            border-radius: 10px;
+            background: var(--accent);
+            color: var(--on-accent);
+            font-size: 14px; font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s ease;
+        }
+        .solve-btn:hover { background: var(--accent-hover); }
+
+        /* Pagination */
+        .pager {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            padding-top: 20px;
+            margin-bottom: 8px;
+            border-top: 1px solid var(--line);
+        }
+        .pager-label { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+        .pager-btn, .scroll-btn {
+            display: inline-block;
+            padding: 11px 22px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: var(--surface-2);
+            color: var(--ink);
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .pager-btn:hover:not(:disabled), .scroll-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+        .pager-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+        .pager-note { margin: 0 0 8px; font-size: 14px; color: var(--muted); text-align: center; }
+        .scroll-btn { margin-top: 20px; }
+
+        /* No results */
+        .empty-state {
+            padding: clamp(22px, 4vw, 36px);
+            margin-bottom: 24px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+        }
+        .empty-icon {
+            width: 48px; height: 48px;
+            display: grid; place-items: center;
+            margin-bottom: 18px;
+            border-radius: 14px;
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+        .empty-state h3 {
+            margin: 0 0 8px;
+            font-family: var(--font-display);
+            font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
+        }
+        .empty-state p { margin: 0; max-width: 52ch; color: var(--muted); }
+
+        @media (max-width: 600px) {
+            form { flex-direction: column; align-items: stretch; }
+            .submit-btn { width: 100%; }
+            input[type="text"] { padding: 14px 12px; }
+            .rec-item { flex-wrap: wrap; }
+            .rec-main { flex-basis: 100%; }
+            .solve-btn { margin-left: auto; }
+            .nav a { padding: 8px 10px; }
+        }
+        @media (max-width: 440px) { .nav { display: none; } }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .submit-btn, form, .solve-btn, .nav a, .preset, .pager-btn, .scroll-btn { transition: none; }
+            .loader { animation-duration: 2s; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="topbar">
+    <a class="brand" href="/" th:href="@{/}">
+        <span class="brand-mark" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 19v-5M12 19V9M18 19V5"/></svg>
+        </span>
+        LeetcodePredictor
+    </a>
+    <nav class="nav" aria-label="Main">
+        <a href="/rating" th:href="@{/rating}">Predict rating</a>
+        <a href="/profile" th:href="@{/profile}">Recommendations</a>
+        <a href="/filter" th:href="@{/filter}" aria-current="page">Filter</a>
+    </nav>
+</header>
+
+<main>
+<div id="search" class="section-container">
+    <div class="hero-inner">
+        <h1 class="hero-title">Want problems in a Fixed Range?</h1>
+        <p class="hero-sub">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
+            Other good tool for you.
+        </p>
+
+        <form id="filterForm">
+            <div class="range-fields">
+                <label for="minRange" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">Minimum rating</label>
+                <input type="text" id="minRange" name="minRange" inputmode="numeric" pattern="[0-9]{1,4}" autocomplete="off" placeholder="Min rating" required/>
+                <span class="range-sep" aria-hidden="true">to</span>
+                <label for="maxRange" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">Maximum rating</label>
+                <input type="text" id="maxRange" name="maxRange" inputmode="numeric" pattern="[0-9]{1,4}" autocomplete="off" placeholder="Max rating" required/>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span class="btn-text">Find Problems</span>
+                <div class="loader" id="btnLoader"></div>
+            </button>
+        </form>
+        <p class="form-error" id="formError" role="alert" hidden></p>
+
+        <div class="presets">
+            <span class="presets-label">Quick picks:</span>
+            <button type="button" class="preset" data-min="1200" data-max="1500">1200&ndash;1500</button>
+            <button type="button" class="preset" data-min="1500" data-max="1800">1500&ndash;1800</button>
+            <button type="button" class="preset" data-min="1800" data-max="2100">1800&ndash;2100</button>
+            <button type="button" class="preset" data-min="2100" data-max="2400">2100&ndash;2400</button>
+            <button type="button" class="preset" data-min="2400" data-max="3600">2400&ndash;3600</button>
+        </div>
+    </div>
+</div>
+
+<div id="result" class="section-container">
+    <div class="dashboard-container" id="dashboard">
+        <div class="header">
+            <h2 id="res-range">Rating range</h2>
+            <span class="page-chip" id="res-page">Page 1</span>
+        </div>
+
+        <div class="empty-state" id="noResults" hidden>
+            <div class="empty-icon" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            </div>
+            <h3>No problems in this range</h3>
+            <p>Nothing matched these ratings. Try a wider range and search again.</p>
+        </div>
+
+        <div id="questionData">
+            <div class="rec-list" id="res-questions"></div>
+
+            <p class="pager-note" id="pagerNote" hidden>That was the last page.</p>
+            <div class="pager">
+                <button type="button" class="pager-btn" id="prevBtn">Previous</button>
+                <span class="pager-label" id="pagerLabel">Page 1</span>
+                <button type="button" class="pager-btn" id="nextBtn">Next</button>
+            </div>
+        </div>
+
+        <a href="#search" class="scroll-btn">&uarr; New Search</a>
+    </div>
+</div>
+</main>
+
+<script>
+    // Change these if your backend differs.
+    // Endpoint: GET /api/filter?minRange=..&maxRange=..&pageNumber=..  (pageNumber starts at 1, 10 per page)
+    const FILTER_API = '/api/filter';
+    const PAGE_SIZE = 10;
+    const LEETCODE_PROBLEM_URL = 'https://leetcode.com/problems/';
+
+    const form = document.getElementById('filterForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.querySelector('.btn-text');
+    const btnLoader = document.getElementById('btnLoader');
+    const dashboard = document.getElementById('dashboard');
+    const formError = document.getElementById('formError');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pagerNote = document.getElementById('pagerNote');
+
+    const minInput = document.getElementById('minRange');
+    const maxInput = document.getElementById('maxRange');
+
+    // Only whole numbers from 0 to 9999: digits only, at most 4 of them
+    const RANGE_PATTERN = /^\d{1,4}$/;
+    const RANGE_ERROR = 'Use whole numbers from 0 to 9999 (digits only).';
+
+    function showFormError(message) {
+        formError.textContent = message;
+        formError.hidden = false;
+    }
+
+    // Runs on every keystroke and paste: drops "-", "+", "e", ".", letters, and anything past 4 digits
+    function sanitizeRangeInput(e) {
+        const el = e.target;
+        const clean = el.value.replace(/\D/g, '').slice(0, 4);
+        if (clean !== el.value) {
+            el.value = clean;
+            showFormError(RANGE_ERROR);
+        } else if (formError.textContent === RANGE_ERROR) {
+            formError.hidden = true;
+        }
+    }
+    minInput.addEventListener('input', sanitizeRangeInput);
+    maxInput.addEventListener('input', sanitizeRangeInput);
+
+    // Current search (the page buttons reuse it)
+    const state = { min: 0, max: 0, page: 1 };
+
+    // Problem rating -> chip color
+    function ratingLevel(rating) {
+        if (rating < 1500) return 'easy';
+        if (rating < 2000) return 'medium';
+        return 'hard';
+    }
+
+    async function fetchQuestions(min, max, page) {
+        const params = new URLSearchParams({ minRange: min, maxRange: max, pageNumber: page });
+        const response = await fetch(`${FILTER_API}?${params.toString()}`);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || "An unexpected error occurred.");
+        }
+        return response.json();
+    }
+
+    function renderQuestions(list) {
+        const container = document.getElementById('res-questions');
+        container.innerHTML = '';
+
+        list.forEach(q => {
+            const row = document.createElement('div');
+            row.className = 'rec-item';
+
+            const main = document.createElement('div');
+            main.className = 'rec-main';
+            const idSpan = document.createElement('span');
+            idSpan.className = 'rec-id';
+            idSpan.textContent = `${q.id}.`;
+            main.appendChild(idSpan);
+            main.appendChild(document.createTextNode(q.title));
+
+            const rating = document.createElement('span');
+            rating.className = 'rec-rating';
+            rating.title = 'Estimated rating';
+            rating.textContent = q.rating;
+            const ratingNum = parseFloat(q.rating);
+            if (!isNaN(ratingNum)) rating.dataset.level = ratingLevel(ratingNum);
+
+            const solve = document.createElement('a');
+            solve.className = 'solve-btn';
+            solve.textContent = 'Solve';
+            solve.href = LEETCODE_PROBLEM_URL + encodeURIComponent(q.titleSlug);
+            solve.target = '_blank';
+            solve.rel = 'noopener noreferrer';
+            solve.setAttribute('aria-label', `Solve ${q.title} on LeetCode`);
+
+            row.appendChild(main);
+            row.appendChild(rating);
+            row.appendChild(solve);
+            container.appendChild(row);
+        });
+    }
+
+    // The backend doesn't send a total, so a full page means "there may be more"
+    function updatePager(list) {
+        document.getElementById('res-page').textContent = `Page ${state.page}`;
+        document.getElementById('pagerLabel').textContent = `Page ${state.page}`;
+        prevBtn.disabled = state.page <= 1;
+        nextBtn.disabled = list.length < PAGE_SIZE;
+        pagerNote.hidden = true;
+    }
+
+    function goToError(error) {
+        // Redirect to the shared error page and pass the REST error message as a query parameter
+        window.location.href = `/api-error?message=${encodeURIComponent(error.message)}`;
+    }
+
+    // New search from the form
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const minText = minInput.value.trim();
+        const maxText = maxInput.value.trim();
+
+        if (!RANGE_PATTERN.test(minText) || !RANGE_PATTERN.test(maxText)) {
+            showFormError(RANGE_ERROR);
+            return;
+        }
+
+        const min = parseInt(minText, 10);
+        const max = parseInt(maxText, 10);
+
+        if (min > max) {
+            showFormError('The minimum rating can\'t be higher than the maximum.');
+            return;
+        }
+        formError.hidden = true;
+
+        // Reset UI State
+        dashboard.classList.remove('active');
+        dashboard.style.display = 'none';
+
+        // Enter Loading State
+        submitBtn.disabled = true;
+        btnText.textContent = 'Searching...';
+        btnLoader.style.display = 'block';
+
+        try {
+            const list = await fetchQuestions(min, max, 1);
+
+            state.min = min;
+            state.max = max;
+            state.page = 1;
+
+            document.getElementById('res-range').textContent = `Rating ${min} \u2013 ${max}`;
+
+            const hasResults = list.length > 0;
+            document.getElementById('noResults').hidden = hasResults;
+            document.getElementById('questionData').hidden = !hasResults;
+            document.getElementById('res-page').hidden = !hasResults;
+
+            if (hasResults) {
+                renderQuestions(list);
+                updatePager(list);
+            }
+
+            dashboard.style.display = 'block';
+            setTimeout(() => {
+                dashboard.classList.add('active');
+                window.location.href = '#result';
+            }, 50);
+
+        } catch (error) {
+            goToError(error);
+        } finally {
+            // Revert Loading State
+            submitBtn.disabled = false;
+            btnText.textContent = 'Find Problems';
+            btnLoader.style.display = 'none';
+        }
+    });
+
+    // Previous / Next
+    async function changePage(targetPage) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+
+        try {
+            const list = await fetchQuestions(state.min, state.max, targetPage);
+
+            // Stepped past the end (the last page was exactly full): stay where we are
+            if (list.length === 0) {
+                pagerNote.hidden = false;
+                prevBtn.disabled = state.page <= 1;
+                nextBtn.disabled = true;
+                return;
+            }
+
+            state.page = targetPage;
+            renderQuestions(list);
+            updatePager(list);
+            dashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (error) {
+            goToError(error);
+        }
+    }
+
+    prevBtn.addEventListener('click', () => changePage(state.page - 1));
+    nextBtn.addEventListener('click', () => changePage(state.page + 1));
+
+    // Quick range picks fill the fields and search right away
+    document.querySelectorAll('.preset').forEach(btn => {
+        btn.addEventListener('click', () => {
+            minInput.value = btn.dataset.min;
+            maxInput.value = btn.dataset.max;
+            form.requestSubmit();
+        });
+    });
+</script>
+
+</body>
+</html>

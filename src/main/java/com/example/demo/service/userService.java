@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.dto.UserData;
 import com.example.demo.entity.Question;
 import com.example.demo.repository.QuestionRepo;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public class userService {
         this.questionRepo = questionRepo;
     }
 
-    public UserData getUser(String userId){
+    public UserData getUser(String userId,Pageable pageable){
         Map<String,Object> mp = LeetcodeScraperService.getUserContestRating(userId);
         if(mp.isEmpty()){
             UserData userData = new UserData();
@@ -41,9 +42,13 @@ public class userService {
         userData.setAttendedContestsCount(String.valueOf(mp.get("attendedContestsCount")));
 
         int userRatingInt = (int) Double.parseDouble(userRating);
-        List<Question> recommendations = questionRepo.getRecommendations(userRatingInt);
+        List<Question> recommendations = getQuestionsInRange(userRatingInt-50,userRatingInt+200,pageable);
         userData.setRecommendations(recommendations);
 
         return userData;
+    }
+
+    public List<Question> getQuestionsInRange(int minRange, int maxRange, Pageable pageable) {
+        return questionRepo.findByRatingBetween(minRange,maxRange,pageable);
     }
 }

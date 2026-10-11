@@ -2,12 +2,17 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.Data;
 import com.example.demo.dto.UserData;
+import com.example.demo.entity.Question;
 import com.example.demo.service.MainService;
 import com.example.demo.service.userService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 public class QueryController {
@@ -25,7 +30,14 @@ public class QueryController {
     }
 
     @GetMapping("/api/user")
-    public UserData getUserDetails(@RequestParam("userId") String userId){
-        return userService.getUser(userId);
+    public UserData getUserDetails(@RequestParam("userId") String userId,@RequestParam("pageNumber") int pageNumber){
+        Pageable pageable = PageRequest.of(pageNumber-1,10);
+        return userService.getUser(userId,pageable);
+    }
+
+    @GetMapping("/api/filter")
+    public List<Question> getQuestionsInRange(@RequestParam("minRange") int minRange, @RequestParam("maxRange") int maxRange,@RequestParam("pageNumber") int pageNumber){
+        Pageable pageable = PageRequest.of(pageNumber-1,10);
+        return userService.getQuestionsInRange(minRange, maxRange, pageable);
     }
 }

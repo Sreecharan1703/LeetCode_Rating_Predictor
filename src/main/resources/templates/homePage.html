@@ -238,7 +238,7 @@
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
             Here's a gift for you.
         </p>
-        <p class="hero-note">Check how hard a problem really is, or get a list of problems picked for you.</p>
+        <p class="hero-note">Check how hard a problem really is, Get a list of problems picked for you, and many more.</p>
 
         <div class="options">
             <a class="option" href="/rating" th:href="@{/rating}">
@@ -265,6 +265,18 @@
                     <div class="mini-row"><span class="mini-line"></span><span class="mini-pill"></span><span class="mini-btn"></span></div>
                 </div>
                 <span class="option-cta">Get recommendations</span>
+            </a>
+
+            <a class="option" href="/filter" th:href="@{/filter}">
+                <div class="option-icon" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                </div>
+                <h2>Filter Questions</h2>
+                <p>Enter a rating range and fetch the problems in that range.</p>
+                <div class="preview" aria-hidden="true">
+                    <div class="mini-row"><span class="mini-pill"></span><span class="mini-pill"></span><span class="mini-line"></span></div>
+                </div>
+                <span class="option-cta">Filter Now</span>
             </a>
         </div>
     </div>

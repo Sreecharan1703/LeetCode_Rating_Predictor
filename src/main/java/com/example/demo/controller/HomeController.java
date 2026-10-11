@@ -34,6 +34,9 @@ public class HomeController {
         return "profilePage";
     }
 
+    @GetMapping("/filter")
+    public String filter(){return "filterPage";}
+
     @GetMapping("/api-error")
     public String errorPage(@RequestParam("message") String message, Model model){
         model.addAttribute("error",message);
