@@ -2,6 +2,9 @@ import pickle
 import pandas as pd
 import re
 import sys
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning)
 
 def load_dataset(query):
     pattern = r',\s*(?![^\[]*\])'
