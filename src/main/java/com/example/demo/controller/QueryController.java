@@ -30,9 +30,8 @@ public class QueryController {
     }
 
     @GetMapping("/api/user")
-    public UserData getUserDetails(@RequestParam("userId") String userId,@RequestParam("pageNumber") int pageNumber){
-        Pageable pageable = PageRequest.of(pageNumber-1,10);
-        return userService.getUser(userId,pageable);
+    public UserData getUserDetails(@RequestParam("userId") String userId){
+        return userService.getUser(userId);
     }
 
     @GetMapping("/api/filter")

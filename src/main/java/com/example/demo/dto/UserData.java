@@ -1,9 +1,5 @@
 package com.example.demo.dto;
 
-import com.example.demo.entity.Question;
-
-import java.util.List;
-
 public class UserData {
     private String userId;
     private String attendedContestsCount;
@@ -11,15 +7,6 @@ public class UserData {
     private String globalRanking;
     private String totalParticipants;
     private String topPercentage;
-    private List<Question> recommendations;
-
-    public List<Question> getRecommendations() {
-        return recommendations;
-    }
-
-    public void setRecommendations(List<Question> recommendations) {
-        this.recommendations = recommendations;
-    }
 
     public String getTopPercentage() {
         return topPercentage;

@@ -391,6 +391,30 @@
         .empty-state p { margin: 0 0 22px; max-width: 52ch; color: var(--muted); }
         .empty-state .solve-btn { display: inline-block; padding: 12px 22px; font-size: 15px; }
 
+        /* Pagination */
+        .pager {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            padding-top: 20px;
+            margin-bottom: 28px;
+            border-top: 1px solid var(--line);
+        }
+        .pager-label { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+        .pager-btn {
+            padding: 11px 22px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: var(--surface-2);
+            color: var(--ink);
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .pager-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+        .pager-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+        .pager-note { margin: 0 0 12px; font-size: 14px; color: var(--muted); text-align: center; }
+
         .scroll-btn {
             display: inline-block;
             padding: 12px 22px;
@@ -418,7 +442,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
-            .meter-marker, .meter-fill, .submit-btn, form, .solve-btn, .nav a { transition: none; }
+            .meter-marker, .meter-fill, .submit-btn, form, .solve-btn, .nav a, .pager-btn { transition: none; }
             .loader { animation-duration: 2s; }
         }
     </style>
@@ -478,7 +502,7 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>
             </div>
             <h3>We can't recommend anything yet</h3>
-            <p>Recommendations are based on your contest performance, and this account hasn't attended a contest. Take part in at least one LeetCode contest, then search again.</p>
+            <p>Recommendations are based on your contest performance, and this account hasn't attended enough contests. Take part in at least four LeetCode contests, then search again.</p>
             <a class="solve-btn" href="https://leetcode.com/contest/" target="_blank" rel="noopener noreferrer">Browse contests</a>
         </div>
 
@@ -514,11 +538,20 @@
             </div>
         </div>
 
-        <div class="rec-header">
+        <div class="rec-header" id="recTop">
             <h3>Recommended for you</h3>
             <span class="rec-note" id="rec-count"></span>
         </div>
         <div class="rec-list" id="res-recommendations"></div>
+
+        <div id="recPager">
+            <p class="pager-note" id="pagerNote" hidden></p>
+            <div class="pager">
+                <button type="button" class="pager-btn" id="prevBtn">Previous</button>
+                <span class="pager-label" id="pagerLabel">Page 1</span>
+                <button type="button" class="pager-btn" id="nextBtn">Next</button>
+            </div>
+        </div>
         </div>
 
         <a href="#search" class="scroll-btn">&uarr; New Search</a>
@@ -528,7 +561,17 @@
 
 <script>
     const PROFILE_API = '/api/user';
+    const FILTER_API = '/api/filter';      // GET ?minRange=..&maxRange=..&pageNumber=.. (page starts at 1, 10 per page)
+    const PAGE_SIZE = 10;
+    const RATING_BELOW = 50;               // recommendations start at userRating - 50
+    const RATING_ABOVE = 200;              // ...and go up to userRating + 200
     const LEETCODE_PROBLEM_URL = 'https://leetcode.com/problems/';
+
+    // Current recommendation range / page (Previous & Next reuse it)
+    const recState = { min: 0, max: 0, page: 1 };
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pagerNote = document.getElementById('pagerNote');
 
     // Formats "12345" as "12,345"; leaves non-numeric values untouched
     function formatNumber(value) {
@@ -554,21 +597,35 @@
         return 'hard';
     }
 
+    async function fetchQuestions(min, max, page) {
+        const params = new URLSearchParams({ minRange: min, maxRange: max, pageNumber: page });
+        const response = await fetch(`${FILTER_API}?${params.toString()}`);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || "An unexpected error occurred.");
+        }
+        return response.json();
+    }
+
+    function showRecommendationsMessage(text) {
+        const container = document.getElementById('res-recommendations');
+        container.innerHTML = '';
+        document.getElementById('rec-count').textContent = '';
+        document.getElementById('recPager').hidden = true;
+
+        const box = document.createElement('div');
+        box.className = 'rec-empty';
+        box.textContent = text;
+        container.appendChild(box);
+    }
+
     function renderRecommendations(list) {
         const container = document.getElementById('res-recommendations');
         const count = document.getElementById('rec-count');
         container.innerHTML = '';
 
-        if (list.length === 0) {
-            count.textContent = '';
-            const empty = document.createElement('div');
-            empty.className = 'rec-empty';
-            empty.textContent = 'No recommendations for this user yet.';
-            container.appendChild(empty);
-            return;
-        }
-
-        count.textContent = `${list.length} problem${list.length === 1 ? '' : 's'} · rating is the estimated difficulty`;
+        count.textContent = `Rated ${recState.min}\u2013${recState.max} · rating is the estimated difficulty`;
 
         list.forEach(q => {
             const row = document.createElement('div');
@@ -603,6 +660,72 @@
             container.appendChild(row);
         });
     }
+
+    // The backend doesn't send a total, so a full page means "there may be more"
+    function updatePager(list) {
+        document.getElementById('recPager').hidden = false;
+        document.getElementById('pagerLabel').textContent = `Page ${recState.page}`;
+        prevBtn.disabled = recState.page <= 1;
+        nextBtn.disabled = list.length < PAGE_SIZE;
+        pagerNote.hidden = true;
+    }
+
+    // Recommendations = problems rated from (userRating - 50) to (userRating + 200)
+    async function loadRecommendations(userRating) {
+        const rating = Math.round(parseFloat(String(userRating).replace(/,/g, '')));
+        if (isNaN(rating)) {
+            showRecommendationsMessage("We couldn't work out your rating, so there's nothing to recommend yet.");
+            return;
+        }
+
+        recState.min = Math.max(0, rating - RATING_BELOW);
+        recState.max = rating + RATING_ABOVE;
+        recState.page = 1;
+
+        try {
+            const list = await fetchQuestions(recState.min, recState.max, 1);
+            if (list.length === 0) {
+                showRecommendationsMessage(`No problems found rated between ${recState.min} and ${recState.max}.`);
+                return;
+            }
+            renderRecommendations(list);
+            updatePager(list);
+        } catch (error) {
+            // Keep the profile on screen and explain what failed
+            showRecommendationsMessage(`We couldn't load recommendations: ${error.message}`);
+        }
+    }
+
+    // Previous / Next
+    async function changePage(targetPage) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+
+        try {
+            const list = await fetchQuestions(recState.min, recState.max, targetPage);
+
+            // Stepped past the end (the last page was exactly full): stay where we are
+            if (list.length === 0) {
+                pagerNote.textContent = 'That was the last page.';
+                pagerNote.hidden = false;
+                prevBtn.disabled = recState.page <= 1;
+                return;
+            }
+
+            recState.page = targetPage;
+            renderRecommendations(list);
+            updatePager(list);
+            document.getElementById('recTop').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (error) {
+            pagerNote.textContent = `We couldn't load that page: ${error.message}`;
+            pagerNote.hidden = false;
+            prevBtn.disabled = recState.page <= 1;
+            nextBtn.disabled = false;
+        }
+    }
+
+    prevBtn.addEventListener('click', () => changePage(recState.page - 1));
+    nextBtn.addEventListener('click', () => changePage(recState.page + 1));
 
     document.getElementById('profileForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -658,7 +781,7 @@
                     `Ahead of ${(100 - top).toFixed(1).replace(/\.0$/, '')}% of participants`;
                 pos = 100 - top;
 
-                renderRecommendations(data.recommendations);
+                await loadRecommendations(data.userRating);
             }
 
             marker.style.left = '0%';

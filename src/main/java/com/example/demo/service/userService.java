@@ -17,7 +17,7 @@ public class userService {
         this.questionRepo = questionRepo;
     }
 
-    public UserData getUser(String userId,Pageable pageable){
+    public UserData getUser(String userId){
         Map<String,Object> mp = LeetcodeScraperService.getUserContestRating(userId);
         if(mp.isEmpty()){
             UserData userData = new UserData();
@@ -27,7 +27,6 @@ public class userService {
             userData.setGlobalRanking(null);
             userData.setTopPercentage(null);
             userData.setTotalParticipants(null);
-            userData.setRecommendations(null);
             return userData;
         }
 
@@ -40,10 +39,6 @@ public class userService {
         userData.setTopPercentage(String.valueOf(mp.get("topPercentage")));
         userData.setTotalParticipants(String.valueOf(mp.get("totalParticipants")));
         userData.setAttendedContestsCount(String.valueOf(mp.get("attendedContestsCount")));
-
-        int userRatingInt = (int) Double.parseDouble(userRating);
-        List<Question> recommendations = getQuestionsInRange(userRatingInt-50,userRatingInt+200,pageable);
-        userData.setRecommendations(recommendations);
 
         return userData;
     }
