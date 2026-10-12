@@ -1,3 +1,19 @@
+# ==========================================
+# Stage 1: Build the Java application
+# ==========================================
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /app
+
+# Copy the pom.xml and source code
+COPY pom.xml .
+COPY src ./src
+
+# Compile the application (skipping tests for faster deployment)
+RUN mvn clean package -DskipTests
+
+# ==========================================
+# Stage 2: Setup Python & Run the app
+# ==========================================
 FROM eclipse-temurin:17-jdk-jammy
 
 # Install Python 3 and pip in the Linux container
@@ -11,8 +27,8 @@ WORKDIR /app
 COPY ml_requirements/ ./ml_requirements/
 RUN pip3 install --no-cache-dir -r ml_requirements/ml_dependencies.txt
 
-# Copy the compiled Java application
-COPY target/*.jar app.jar
+# Copy the compiled Java application FROM the build stage above
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
