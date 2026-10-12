@@ -3,8 +3,10 @@ package com.example.demo.service;
 import com.example.demo.dto.Data;
 import com.example.demo.entity.Question;
 import com.example.demo.repository.QuestionRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,7 +18,12 @@ import static java.lang.Double.parseDouble;
 @Service
 @EnableCaching
 public class MainService {
+    @Autowired
+    @Lazy
+    private MainService self;
+
     private final QuestionRepo questionRepo;
+
     MainService(QuestionRepo questionRepo) {
         this.questionRepo = questionRepo;
     }
@@ -51,7 +58,7 @@ public class MainService {
         outputData.setTotalSubmissions(String.valueOf(mp.get("TotalSubmissions")));
         outputData.setTags(topiclist);
 
-        int rating = getRating(mp,(String)mp.get("ID"),topiclist);
+        int rating = self.getRating(mp,(String)mp.get("ID"),topiclist);
         outputData.setRating(Integer.toString(rating));
 
         return outputData;
@@ -59,6 +66,8 @@ public class MainService {
 
     @Cacheable(value = "Ratings",key = "#id")
     public int getRating(Map<String,Object> mp,String id,List<String> topiclist){
+
+        System.out.println("cache miss !!@@!!");
 
         Optional<Integer> rating = questionRepo.getQuestionRatingById(Integer.parseInt(id));
         if(rating.isPresent()){
