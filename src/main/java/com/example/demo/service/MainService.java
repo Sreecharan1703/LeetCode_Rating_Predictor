@@ -67,8 +67,6 @@ public class MainService {
     @Cacheable(value = "Ratings",key = "#id")
     public int getRating(Map<String,Object> mp,String id,List<String> topiclist){
 
-        System.out.println("cache miss !!@@!!");
-
         Optional<Integer> rating = questionRepo.getQuestionRatingById(Integer.parseInt(id));
         if(rating.isPresent()){
             return rating.get();
