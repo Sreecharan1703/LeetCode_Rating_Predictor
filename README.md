@@ -63,7 +63,7 @@ LeetCode shows Easy / Medium / Hard, but inside each of those labels the difficu
 | **Thymeleaf** | Server-rendered pages and shared error pages |
 | **Docker** | Packaging and deployment |
 
-**Frontend (Made By Ai)**
+**Frontend (Made By AI)**
 
 | Technology | Used for |
 |---|---|
@@ -296,7 +296,7 @@ Then open **http://localhost:80**.
 
 ## Deployment
 
-The live site runs as a Docker container on a free hosting plan with a hosted MySQL-compatible database. Free instances go to sleep when idle, so a i wrote a app-script code to keep the instance awake. View counts are stored in the database, so they survive restarts.
+The live site runs as a Docker container on a free hosting plan (Render) with a hosted MySQL-compatible database (TiDB). Free instances go to sleep when idle, so a i wrote a app-script code to keep the instance awake. View counts are stored in the database, so they survive restarts.
 
 ## Limitations
 
