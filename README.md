@@ -12,6 +12,7 @@ Predict a problem's rating, get problems picked for your level, and filter quest
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?logo=springboot&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-2B579A?logo=python&logoColor=white)
 
 </div>
 
